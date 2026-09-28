@@ -34,8 +34,8 @@ export const TransactionsTable = ({ blocks, transactionReceipts }: TransactionsT
                 const functionLabel = isContractCreation
                   ? "Contract Creation"
                   : tx.functionName && tx.functionName !== "0x"
-                  ? tx.functionName
-                  : "";
+                    ? tx.functionName
+                    : "";
                 const showFunctionSelectorBadge = !isContractCreation && functionCalled !== "0x";
 
                 return (
