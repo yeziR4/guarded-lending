@@ -33,6 +33,8 @@ bash scripts/check-gate.sh --local   # full bounty gate from committed files
 
 `make` is required by the base wrappers (`npm run foundry:deploy`, `npm run lint`). Without it, use the `forge` commands above.
 
+Use **Foundry ≤ 1.7.x** (`foundryup --install v1.5.1`) for anything that talks to Hedera: Foundry 1.8 sends EIP-1898 block objects the Hedera JSON-RPC relay rejects (`-32602 ... [object Object]`). If you see that error, it's the Foundry version, not the code.
+
 ## Layout
 
 | Path | Purpose |

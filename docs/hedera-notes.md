@@ -2,6 +2,16 @@
 
 Each item here cost real debugging time while building this template on testnet. The code already handles all of them; this page explains why it looks the way it does.
 
+## Pin Foundry below 1.8
+
+Foundry 1.8.x's fork backend sends EIP-1898 block objects (`{"blockHash": ...}`) for state reads. The Hiero JSON-RPC relay behind Hashio and other public Hedera endpoints only accepts a block number or tag, and answers `-32602 Invalid parameter 1: ... [object Object]`. Every `forge script` (which simulates against a fork) and every `--fork-url` test hits this. We reproduced it on 1.8.3; Foundry 1.5.1 and 1.7.1 send `"latest"` and work ([lattice#227](https://github.com/dadadave80/lattice/issues/227)).
+
+```bash
+foundryup --install v1.5.1
+```
+
+CI pins the same version. Offline unit tests (`forge test` without `--fork-url`) are unaffected.
+
 ## HBAR has two units depending on where you are
 
 | Where | Unit | Decimals |

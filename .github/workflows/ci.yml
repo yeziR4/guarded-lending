@@ -14,10 +14,12 @@ jobs:
       run:
         working-directory: packages/foundry
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.1 # Foundry >= 1.8 sends EIP-1898 block objects the Hedera JSON-RPC relay rejects
       - run: forge fmt --check
       - run: forge build --sizes
       - run: forge test -vv
@@ -31,24 +33,28 @@ jobs:
       run:
         working-directory: packages/foundry
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.1 # Foundry >= 1.8 sends EIP-1898 block objects the Hedera JSON-RPC relay rejects
       - run: forge test --match-path "test/fork/*" --fork-url https://testnet.hashio.io/api --chain-id 296 -vv
 
   frontend:
     name: Frontend (lint, types, build)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.1 # Foundry >= 1.8 sends EIP-1898 block objects the Hedera JSON-RPC relay rejects
       - run: npm ci
       - run: npm run lint
       - run: npm run next:check-types
@@ -60,10 +66,16 @@ jobs:
     # Scaffolds through the public CLI from GitHub, so it needs the commit to be pushed and public.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
       - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.5.1 # Foundry >= 1.8 sends EIP-1898 block objects the Hedera JSON-RPC relay rejects
+      - name: Configure git (create-scaffold-hbar commits the new project)
+        run: |
+          git config --global user.name "gate-check"
+          git config --global user.email "gate-check@users.noreply.github.com"
       - name: Scaffold, install, lint, build, boot and probe routes
         run: bash scripts/check-gate.sh "${{ github.repository }}#${{ github.sha }}"

@@ -51,7 +51,8 @@ To use the market, connect a wallet on Hedera testnet (MetaMask with the Hashio 
 ### Prerequisites
 
 - Node.js ≥ 20.18.3 and npm
-- [Foundry](https://book.getfoundry.sh/getting-started/installation) (`forge`, `cast`)
+- Git with `user.name` and `user.email` set (the CLI commits the new project)
+- [Foundry](https://book.getfoundry.sh/getting-started/installation) **≤ 1.7.x**, e.g. `foundryup --install v1.5.1`. Foundry 1.8 sends EIP-1898 block objects that the Hedera JSON-RPC relay rejects, which breaks `forge script` deploys and fork tests ([details](docs/hedera-notes.md#pin-foundry-below-18)). Offline `forge test` works on any version.
 - `make`, used by the base template's lint and deploy wrappers. On Windows, use WSL or Git Bash with make, or run the plain `forge` commands shown below.
 
 ## Architecture
