@@ -68,6 +68,7 @@ Use **Foundry ≤ 1.7.x** (`foundryup --install v1.5.1`) for anything that talks
 7. **Hedera system contracts are not available in `forge script` simulation.** Do not call HTS/HSS from `Deploy.s.sol`; put such calls in `setupMarket.js`.
 8. **Only a contract itself can be the auto-renew account** (or treasury/key holder) of a token it creates via HTS. Naming any other account fails with response code 326.
 9. **Guardian scheduling uses a direct CALL to 0x16b**, never DELEGATECALL, and tolerates `block.timestamp` being up to `BLOCK_TIME_TOLERANCE` behind the booked second.
+10. **A tick must never revert because booking failed.** `scheduleCall` costs ~1.4M gas; keep `GUARDIAN_GAS_LIMIT` ≥ ~1.6M and keep the `try/catch` in `_scheduleNext`.
 
 ## Adding a price source
 

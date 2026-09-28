@@ -119,6 +119,28 @@ contract GuardianTest is MarketFixture {
         assertEq(hss.scheduled(), 2);
     }
 
+    /// Regression for the live testnet run: with a 400k gas limit the scheduled tick ran out of gas inside
+    /// scheduleCall and reverted, discarding its oracle check. Booking failures must not undo the tick.
+    function test_tick_bookingOutOfGas_keepsCheckAndStopsLoop() public {
+        guardian.start();
+        hss.setExhaustGas(true);
+        chainlink.setReverts(true);
+        pyth.setReverts(true);
+        vm.warp(block.timestamp + INTERVAL);
+
+        vm.expectEmit(address(guardian));
+        emit Guardian.ScheduleFailed(guardian.SCHEDULE_CALL_REVERTED());
+        guardian.tick{ gas: 3_000_000 }();
+
+        assertEq(guardian.runs(), 1, "tick persisted");
+        assertTrue(guard.isTripped(), "oracle check persisted");
+        assertEq(guardian.nextRunAt(), 0, "loop stopped, restartable");
+
+        hss.setExhaustGas(false);
+        guardian.start();
+        assertEq(hss.scheduled(), 2);
+    }
+
     function test_noCapacity_stopsLoop() public {
         hss.setHasCapacity(false);
         guardian.start();

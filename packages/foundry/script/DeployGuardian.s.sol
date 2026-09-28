@@ -16,8 +16,8 @@ contract DeployGuardianScript is ScaffoldETHDeploy {
         Guardian guardian = new Guardian(
             OracleGuard(deployedAddress("OracleGuard")),
             LendingMarket(deployedAddress("LendingMarket")),
-            vm.envOr("GUARDIAN_INTERVAL", uint256(1 hours)),
-            vm.envOr("GUARDIAN_GAS_LIMIT", uint256(400_000))
+            vm.envOr("GUARDIAN_INTERVAL", uint256(6 hours)),
+            vm.envOr("GUARDIAN_GAS_LIMIT", uint256(2_000_000))
         );
         deployments.push(Deployment({ name: "Guardian", addr: address(guardian) }));
     }

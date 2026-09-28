@@ -6,6 +6,8 @@ pragma solidity ^0.8.28;
 contract MockScheduleService {
     int64 public responseCode = 22;
     bool public hasCapacity = true;
+    /// @notice Models the live failure: booking needs more gas than the caller forwarded.
+    bool public exhaustGas;
     uint256 public scheduled;
 
     address public lastTo;
@@ -21,6 +23,10 @@ contract MockScheduleService {
         hasCapacity = value;
     }
 
+    function setExhaustGas(bool value) external {
+        exhaustGas = value;
+    }
+
     function hasScheduleCapacity(uint256, uint256) external view returns (bool) {
         return hasCapacity;
     }
@@ -29,6 +35,9 @@ contract MockScheduleService {
         external
         returns (int64, address)
     {
+        if (exhaustGas) {
+            while (true) { } // runs out of whatever gas it was given
+        }
         if (responseCode != 22) return (responseCode, address(0));
         scheduled++;
         lastTo = to;

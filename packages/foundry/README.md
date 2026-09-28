@@ -16,7 +16,7 @@ Contracts, tests, deploy scripts and Node helpers for the guarded lending market
 ## Tests
 
 ```bash
-forge test                                                   # offline: 45 unit/fuzz tests, HTS + HSS mocked
+forge test                                                   # offline: 46 unit/fuzz tests, HTS + HSS mocked
 forge test --match-contract BonzoReplay -vv                  # the exploit replay
 forge test --match-path "test/fork/*" \
   --fork-url https://testnet.hashio.io/api --chain-id 296 -vv  # real guard vs live testnet feeds

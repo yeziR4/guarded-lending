@@ -20,6 +20,11 @@ contract Guardian {
     ///      its booked second can observe a slightly earlier time. Observed on testnet: booked for
     ///      1790605316, executed at consensus 1790605316.07 inside a block that began a second earlier.
     uint256 public constant BLOCK_TIME_TOLERANCE = 10;
+    /// @dev Gas kept back from the HSS call so a failed booking can still be recorded.
+    uint256 private constant BOOKKEEPING_GAS = 30_000;
+    /// @notice `ScheduleFailed` reasons that are not HSS response codes.
+    int64 public constant NO_CAPACITY = -1;
+    int64 public constant SCHEDULE_CALL_REVERTED = -2;
 
     error InvalidParams();
     error AlreadyRunning(uint256 nextRunAt);
@@ -67,27 +72,38 @@ contract Guardian {
         return block.timestamp + BLOCK_TIME_TOLERANCE >= nextRunAt;
     }
 
+    /// @dev Books the next tick. Any failure leaves the loop stopped (`nextRunAt == 0`) so `start()` can
+    ///      restart it, and never reverts: the tick's oracle check must persist even if booking fails.
     function _scheduleNext() private {
         uint256 runAt = block.timestamp + INTERVAL;
-        nextRunAt = runAt;
 
         if (!HSS.hasScheduleCapacity(runAt, GAS_LIMIT)) {
-            nextRunAt = 0;
-            emit ScheduleFailed(-1);
+            _stop(NO_CAPACITY);
             return;
         }
 
-        (int64 rc, address schedule) =
-            HSS.scheduleCall(address(this), runAt, GAS_LIMIT, 0, abi.encodeCall(this.tick, ()));
-        if (rc != HSS_SUCCESS || schedule == address(0)) {
-            // Leave the loop stopped so `start()` can restart it.
-            nextRunAt = 0;
-            emit ScheduleFailed(rc);
-            return;
+        // Booking a schedule costs ~1.4M gas on Hedera (the schedule fee is charged as gas), so a GAS_LIMIT
+        // that is too small makes this call run out of gas. Keep enough back to record the failure.
+        try HSS.scheduleCall{ gas: gasleft() - BOOKKEEPING_GAS }(
+            address(this), runAt, GAS_LIMIT, 0, abi.encodeCall(this.tick, ())
+        ) returns (
+            int64 rc, address schedule
+        ) {
+            if (rc != HSS_SUCCESS || schedule == address(0)) {
+                _stop(rc);
+                return;
+            }
+            nextRunAt = runAt;
+            nextSchedule = schedule;
+            emit Scheduled(schedule, runAt);
+        } catch {
+            _stop(SCHEDULE_CALL_REVERTED);
         }
+    }
 
-        nextSchedule = schedule;
-        emit Scheduled(schedule, runAt);
+    function _stop(int64 reason) private {
+        nextRunAt = 0;
+        emit ScheduleFailed(reason);
     }
 
     receive() external payable { }

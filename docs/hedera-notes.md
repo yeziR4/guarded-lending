@@ -44,7 +44,8 @@ The first live Guardian booked its tick for second 1790605316. HSS executed it o
 
 ## HIP-1215 scheduled calls: what to expect
 
-- The scheduling contract pays for execution. On testnet a Guardian tick with a 400k gas limit cost about 0.18 HBAR. Hedera charges at least 80% of the gas limit, so do not over-provision it.
+- **Booking a schedule is expensive in gas.** `scheduleCall` charges the schedule fee as gas: about 1.4M. Our first fixed Guardian had a 400k tick limit. Its scheduled tick used 396,552 gas, ran out inside `scheduleCall` while booking the next run, and reverted, taking the tick's oracle check with it. Now the tick limit defaults to 2M, and booking runs in a `try/catch` that keeps gas back, so a failed booking emits `ScheduleFailed` and stops the loop cleanly instead of reverting the tick.
+- The scheduling contract pays for execution. A self-rescheduling tick costs about 1.7 HBAR on testnet, which is why the default interval is 6 hours. Hedera charges at least 80% of the gas limit, so don't set it far above what is used.
 - Schedule from a direct `CALL` to `0x16b`. Scheduling from a `DELEGATECALL` frame currently fails at execution on testnet ([hiero-consensus-node#27263](https://github.com/hiero-ledger/hiero-consensus-node/issues/27263)).
 - A booked schedule is its own entity (`0.0.x`) and is visible on HashScan with its execution timestamp.
 

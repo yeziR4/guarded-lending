@@ -131,7 +131,7 @@ flowchart LR
 | --- | --- |
 | Deploy 6 contracts | ~5 |
 | `initialize` (HTS token creation, 1 HBAR kept as renewal reserve) | ~15 sent, remainder refunded |
-| Guardian tick (hourly by default) | ~0.18 each, paid from the Guardian's balance |
+| Guardian tick (every 6 h by default) | ~1.7 each (booking the next run costs ~1.4M gas), paid from the Guardian's balance |
 | HCS message | < 0.01 each |
 
 Guardian funding **cannot be withdrawn**: the contract has no owner. Fund it for the period you want it to run, and top it up by sending HBAR to it.
@@ -150,7 +150,7 @@ Guardian funding **cannot be withdrawn**: the contract has no owner. Fund it for
 | `GUARD_MIN_PRICE_E18` / `GUARD_MAX_PRICE_E18` | $0.001 / $100 | Absolute sanity band |
 | `CHAINLINK_MAX_AGE`, `SUPRA_MAX_AGE`, `PYTH_MAX_AGE` | 2h, 2h, 10m | Per-source staleness limits |
 | `PYTH_MAX_CONF_BPS` | 200 | Reject Pyth prices with a confidence interval over 2% |
-| `GUARDIAN_INTERVAL`, `GUARDIAN_GAS_LIMIT` | 3600, 400000 | Tick cadence and gas per scheduled tick |
+| `GUARDIAN_INTERVAL`, `GUARDIAN_GAS_LIMIT` | 21600, 2000000 | Tick cadence and gas per scheduled tick. Below ~1.6M the tick cannot book its successor |
 
 Risk parameters (LTV 65%, liquidation threshold 80%, bonus 5%, close factor 50%, 2% + 20%×utilization APR) are set in the same script. The constructor rejects combinations where the liquidation bonus would create bad debt.
 
@@ -169,7 +169,7 @@ Since the Pyth Core upgrade (26 Aug 2026), Hermes requires an API key. Without o
 ## Testing
 
 ```bash
-npm run foundry:test            # 45 unit tests, offline, including the Bonzo replay and a fuzz test
+npm run foundry:test            # 46 unit tests, offline, including the Bonzo replay and a fuzz test
 npm run foundry:test:testnet    # runs the real guard against live Hedera testnet feeds
 scripts/check-gate.sh --local   # bounty gate: fresh scaffold, lint, tests, build, boot, routes
 ```
