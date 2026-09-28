@@ -59,7 +59,7 @@ const keystore = arg("keystore");
 const intervalMs = Number(arg("interval", "30")) * 1000;
 if (!network || !keystore) {
   console.error(
-    "Usage: npm run relay -- --keystore <name> [--network hedera_testnet] [--topic 0.0.x]"
+    "Usage: npm run relay -- --keystore <name> [--network hedera_testnet] [--topic 0.0.x]",
   );
   process.exit(1);
 }
@@ -67,11 +67,11 @@ if (!network || !keystore) {
 const deployments = JSON.parse(
   readFileSync(
     join(__dirname, "..", "deployments", `${network.chainId}.json`),
-    "utf8"
-  )
+    "utf8",
+  ),
 );
 const guardAddress = Object.keys(deployments).find(
-  (key) => deployments[key] === "OracleGuard"
+  (key) => deployments[key] === "OracleGuard",
 );
 if (!guardAddress) {
   console.error("OracleGuard not found in deployments. Deploy first.");
@@ -121,10 +121,10 @@ if (!topicId) {
   topicId = receipt.topicId.toString();
   console.log(`\n🆕 Created HCS topic ${topicId}`);
   console.log(
-    `   Set NEXT_PUBLIC_AUDIT_TOPIC_ID=${topicId} in packages/nextjs/.env.local`
+    `   Set NEXT_PUBLIC_AUDIT_TOPIC_ID=${topicId} in packages/nextjs/.env.local`,
   );
   console.log(
-    `   Pass --topic ${topicId} (or set AUDIT_TOPIC_ID) on the next run.\n`
+    `   Pass --topic ${topicId} (or set AUDIT_TOPIC_ID) on the next run.\n`,
   );
 }
 
@@ -140,7 +140,7 @@ for (let i = 0; i < (await guard.sourceCount()).toNumber(); i++) {
 const cursorPath = join(
   __dirname,
   "..",
-  `.relay-cursor-${network.chainId}-${topicId}.json`
+  `.relay-cursor-${network.chainId}-${topicId}.json`,
 );
 let cursor = existsSync(cursorPath)
   ? JSON.parse(readFileSync(cursorPath, "utf8")).timestamp
@@ -172,7 +172,7 @@ function toMessage(parsed, log) {
 
 async function relayOnce() {
   const { logs } = await mirror(
-    `/api/v1/contracts/${guardAddress}/results/logs?timestamp=gt:${cursor}&order=asc&limit=100`
+    `/api/v1/contracts/${guardAddress}/results/logs?timestamp=gt:${cursor}&order=asc&limit=100`,
   );
   for (const log of logs) {
     let parsed;
@@ -197,7 +197,7 @@ async function relayOnce() {
 console.log(
   `Relaying OracleGuard ${guardAddress} → HCS topic ${topicId} every ${
     intervalMs / 1000
-  }s (Ctrl+C to stop)`
+  }s (Ctrl+C to stop)`,
 );
 for (;;) {
   try {

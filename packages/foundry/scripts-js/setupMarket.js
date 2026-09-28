@@ -46,8 +46,8 @@ const network = NETWORKS[networkName];
 if (!network) {
   console.error(
     `Unknown network '${networkName}'. Use one of: ${Object.keys(NETWORKS).join(
-      ", "
-    )}`
+      ", ",
+    )}`,
   );
   process.exit(1);
 }
@@ -60,7 +60,7 @@ const deploymentsPath = join(
   __dirname,
   "..",
   "deployments",
-  `${network.chainId}.json`
+  `${network.chainId}.json`,
 );
 if (!existsSync(deploymentsPath)) {
   console.error(`No deployments found at ${deploymentsPath}. Deploy first.`);
@@ -71,7 +71,7 @@ if (!existsSync(deploymentsPath)) {
 const byName = Object.fromEntries(
   Object.entries(JSON.parse(readFileSync(deploymentsPath, "utf8")))
     .filter(([key]) => key.startsWith("0x"))
-    .map(([address, name]) => [name, address])
+    .map(([address, name]) => [name, address]),
 );
 for (const name of ["LendingMarket", "OracleGuard", "Guardian"]) {
   if (!byName[name]) {
@@ -112,12 +112,12 @@ function send(label, to, signature, args = [], value) {
     console.error(`\n❌ ${label} failed.`);
     if (receipt?.transactionHash)
       console.error(
-        `   https://hashscan.io/${network.explorer}/tx/${receipt.transactionHash}`
+        `   https://hashscan.io/${network.explorer}/tx/${receipt.transactionHash}`,
       );
     process.exit(result.status || 1);
   }
   console.log(
-    `   ✔ https://hashscan.io/${network.explorer}/tx/${receipt.transactionHash}`
+    `   ✔ https://hashscan.io/${network.explorer}/tx/${receipt.transactionHash}`,
   );
 }
 
@@ -125,11 +125,11 @@ function call(to, signature) {
   const result = spawnSync(
     "cast",
     ["call", to, signature, "--rpc-url", network.rpc],
-    { encoding: "utf8" }
+    { encoding: "utf8" },
   );
   if (result.status !== 0) {
     console.error(
-      `\n❌ Could not read ${signature} on ${to}:\n${result.stderr}`
+      `\n❌ Could not read ${signature} on ${to}:\n${result.stderr}`,
     );
     process.exit(1);
   }
@@ -145,7 +145,7 @@ if (call(byName.LendingMarket, "shareToken()(address)") === ZERO_ADDRESS) {
     byName.LendingMarket,
     "initialize(string,string)",
     ["Guarded USDC", "gUSDC"],
-    htsFeeHbar
+    htsFeeHbar,
   );
 } else {
   console.log("\n✔ Market already initialized");
@@ -160,13 +160,13 @@ if (nextRunAt <= BigInt(Math.floor(Date.now() / 1000))) {
     byName.Guardian,
     "start()",
     [],
-    guardianFundingHbar
+    guardianFundingHbar,
   );
 } else {
   console.log(
     `\n✔ Guardian already scheduled for ${new Date(
-      Number(nextRunAt) * 1000
-    ).toISOString()}`
+      Number(nextRunAt) * 1000,
+    ).toISOString()}`,
   );
 }
 

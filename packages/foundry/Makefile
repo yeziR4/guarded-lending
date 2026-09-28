@@ -64,14 +64,12 @@ flatten:
 	forge flatten
 
 # Format code
-# --no-plugin-search: npm hoists the Next.js package's prettier plugins to the root node_modules, and
-# prettier 2 would otherwise auto-load them here and fail the lint on untouched files.
 format:
-	forge fmt && prettier --no-plugin-search --write ./scripts-js/**/*.js
+	forge fmt && prettier --write ./scripts-js/**/*.js
 
 # Lint code
 lint:
-	forge fmt --check && prettier --no-plugin-search --check ./scripts-js/**/*.js
+	forge fmt --check && prettier --check ./scripts-js/**/*.js
 
 # Run tests
 test:
