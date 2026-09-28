@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { dev }) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
+    // Optional peer dependencies of @coinbase/cdp-sdk (pulled in via wagmi's Base Account connector)
+    // that it imports unconditionally. This app never uses x402 payments, so resolve them to empty modules.
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@x402/core": false,
+      "@x402/evm": false,
+      "@x402/extensions": false,
+      "@x402/svm": false,
+    };
     config.externals.push("pino-pretty", "lokijs", "encoding");
     if (dev) {
       config.watchOptions = {

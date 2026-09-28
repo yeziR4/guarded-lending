@@ -1,138 +1,95 @@
 # Agent instructions
 
-Briefing for coding agents in this app (Cursor, Claude Code, Codex). Claude Code loads it through `CLAUDE.md`.
+Briefing for coding agents (Claude Code, Cursor, Codex) working in a project scaffolded from the **guarded-lending** template. Claude Code loads it through `CLAUDE.md`.
 
-This is a Scaffold-HBAR dApp: Next.js App Router, wallet connect, Debug Contracts, and Hedera networks (testnet, mainnet, local fork). The CLI may have left only Hardhat or only Foundry.
+## What this app is
 
-Use the package manager this project was created with (`packageManager` in the root `package.json`, or the lockfile). Examples use `npm`; if the app was created with npm, swap `npm <script>` for `npm run <script>`.
+An isolated lending market on Hedera: lenders supply USDC (an HTS token) and receive gUSDC (an HTS token the market creates); borrowers lock native HBAR and borrow USDC. Every price-dependent action goes through `OracleGuard`, which takes the median of Chainlink, Supra and Pyth, requires a quorum, and trips a breaker instead of accepting a bad price. `Guardian` re-runs the check on a schedule it books itself through the Hedera Schedule Service. `hcsRelay.js` mirrors guard decisions to an HCS topic.
 
-## Which Solidity package
-
-- `packages/hardhat` exists → Hardhat (`hardhat-deploy`)
-- `packages/foundry` exists → Foundry (Forge scripts)
-- `packages/nextjs` is always the frontend (App Router, RainbowKit, Wagmi, Viem, DaisyUI)
-
-Follow only the flavor that is present.
+Read `README.md` for the product view and `docs/oracle-guard.md` for the guard's rules before changing contracts.
 
 ## Commands
 
-Package-prefixed scripts for package-specific work. Keep only truly cross-workspace commands unprefixed.
+npm only (`packageManager` is npm; there is no yarn setup).
 
 ```bash
-# Local chain + deploy + frontend (separate terminals)
-npm run hardhat:chain    # Hedera-forked Hardhat node on 8545
-npm run hardhat:deploy --network localhost
-npm run foundry:chain    # Anvil from the Foundry package
-npm run foundry:deploy
-npm run next:start       # http://localhost:3000
-
-# Frontend only
-npm run next:dev
-
-# Quality / build
-npm run lint
-npm run format
-npm run next:build
-npm run hardhat:compile
+npm run foundry:test                 # offline unit tests (HTS/HSS mocked). Must stay green.
+npm run foundry:test:testnet         # live testnet oracle check (network)
 npm run foundry:compile
+npm run lint                         # next lint + forge fmt --check + prettier (scripts-js)
+npm run next:check-types
+npm run next:build
+npm run next:dev                     # http://localhost:3000
 
-# Live networks
-npm run hardhat:deploy --network hederaTestnet   # or hederaMainnet
-npm run foundry:deploy --network hedera_testnet  # or hedera_mainnet
-npm run hardhat:verify:testnet
-npm run foundry:verify:testnet
+# Deploy (keystore-based; never put keys in .env)
+cd packages/foundry
+forge script script/Deploy.s.sol --rpc-url hedera_testnet --account <keystore> --broadcast --slow --legacy
+node scripts-js/generateTsAbis.js
+npm run setup -- --network hedera_testnet --keystore <keystore>   # HTS token + first poke + Guardian start
+npm run relay -- --keystore <keystore> [--topic 0.0.x]           # HCS audit relayer
 
-# Deployer account
-npm run hardhat:account:generate
-npm run hardhat:account:import
-npm run hardhat:account
+bash scripts/check-gate.sh --local   # full bounty gate from committed files
 ```
 
-`npm run hardhat:deploy` without `--network localhost` targets the in-process `hardhat` network, not the long-running fork.
+`make` is required by the base wrappers (`npm run foundry:deploy`, `npm run lint`). Without it, use the `forge` commands above.
 
 ## Layout
 
-### Hardhat
-
-- Contracts: `packages/hardhat/contracts/`
-- Deploy scripts: `packages/hardhat/deploy/`
-- Tests: `packages/hardhat/test/`
-- Config: `packages/hardhat/hardhat.config.ts`
-- Tagged deploy: if `deployHederaToken.tags = ["HederaToken"]`, run `npm run hardhat:deploy --tags HederaToken`
-
-### Foundry
-
-- Contracts: `packages/foundry/contracts/`
-- Deploy scripts: `packages/foundry/script/` (`Deploy.s.sol`, `DeployHederaToken.s.sol`, `DeployHtsTokenCreator.s.sol`)
-- Tests: `packages/foundry/test/`
-- Config: `packages/foundry/foundry.toml`
-- One contract: `npm run foundry:deploy --file DeployHederaToken.s.sol`
-
-### After deploy
-
-ABIs and addresses are written to `packages/nextjs/contracts/deployedContracts.ts`. Put third-party contracts in `packages/nextjs/contracts/externalContracts.ts`.
-
-Sample contracts on this starter: `HederaToken` (ERC-20) and `HtsTokenCreator` (HTS precompile at `0x167`).
-
-## Frontend contract interaction
-
-Hooks live in `packages/nextjs/hooks/scaffold-hbar`. Use the names that exist in the codebase:
-
-- `useScaffoldReadContract` — not `useScaffoldContractRead`
-- `useScaffoldWriteContract` — not `useScaffoldContractWrite`
-
-Also: `useScaffoldWatchContractEvent`, `useScaffoldEventHistory`, `useDeployedContractInfo`, `useScaffoldContract`, `useTransactor`.
-
-```typescript
-const { data: balance } = useScaffoldReadContract({
-  contractName: "HederaToken",
-  functionName: "balanceOf",
-  args: [connectedAddress],
-});
-
-const { writeContractAsync, isPending } = useScaffoldWriteContract({
-  contractName: "HederaToken",
-});
-
-await writeContractAsync({
-  functionName: "mint",
-  args: [connectedAddress, parseEther("1")],
-});
-```
-
-`HederaToken.mint` is `onlyOwner`. For HTS creation, `HtsTokenCreator.createToken` is payable (HTS fee via `msg.value`) and emits `TokenCreated`.
-
-### UI
-
-Use `@scaffold-hbar-ui/components` for web3 UI: `Address`, `AddressInput`, `Balance`, `EtherInput`, `IntegerInput`.
-
-Use DaisyUI classes, not raw Tailwind when a DaisyUI component exists:
-
-```tsx
-<button className="btn btn-primary">Connect</button>
-```
-
-### Networks
-
-- Hardhat: `packages/hardhat/hardhat.config.ts` (`hederaTestnet` 296, `hederaMainnet` 295)
-- Foundry: `packages/foundry/foundry.toml` (`hedera_testnet`, `hedera_mainnet`)
-- Next.js: `packages/nextjs/scaffold.config.ts` (target networks, polling, RPC overrides, WalletConnect)
-
-## Style
-
-| Style | Use |
+| Path | Purpose |
 | --- | --- |
-| `UpperCamelCase` | types, components |
-| `lowerCamelCase` | variables, functions |
-| `CONSTANT_CASE` | constants |
-| `snake_case` | Hardhat deploy files and Foundry scripts |
+| `packages/foundry/contracts/oracle/IPriceSource.sol` | Source interface: `latest() -> (priceE18, updatedAt)`, `label()` |
+| `packages/foundry/contracts/oracle/sources/*.sol` | Chainlink, Supra, Pyth adapters |
+| `packages/foundry/contracts/oracle/OracleGuard.sol` | Median, quorum, bounds, change limit, breaker |
+| `packages/foundry/contracts/LendingMarket.sol` | Market, gUSDC via HTS, interest, liquidation |
+| `packages/foundry/contracts/Guardian.sol` | HIP-1215 self-rescheduling keeper |
+| `packages/foundry/script/Deploy.s.sol` | Feed addresses per chain + all parameters (env-overridable) |
+| `packages/foundry/script/DeployGuardian.s.sol` | Redeploy only the Guardian against recorded guard/market |
+| `packages/foundry/scripts-js/setupMarket.js` | Post-deploy HTS/HSS calls (idempotent) |
+| `packages/foundry/scripts-js/hcsRelay.js` | Mirror node -> HCS relayer |
+| `packages/foundry/test/BonzoReplay.t.sol` | The exploit replay; read it to understand the threat model |
+| `packages/foundry/test/mocks/` | `MockHts` (0x167), `MockScheduleService` (0x16b), `MockPriceSource` |
+| `packages/nextjs/app/page.tsx` | Dashboard composition |
+| `packages/nextjs/components/lending/` | Oracle panel, lender/borrower/liquidation/guardian cards, audit log |
+| `packages/nextjs/hooks/lending/` | `useOracleGuard`, `useMarket`, `useHtsToken`, `usePythUpdate` |
+| `packages/nextjs/app/api/pyth-update/route.ts` | Server-side Hermes proxy (API key stays server-side) |
+| `packages/nextjs/contracts/deployedContracts.ts` | Generated by `generateTsAbis.js`. Do not hand-edit |
+| `packages/nextjs/contracts/externalContracts.ts` | USDC and Pyth per chain |
 
-Next.js imports use the `~~` alias:
+## Invariants: do not break these
 
-```tsx
-import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
-```
+1. **Every price-dependent market action calls `_guardedPrice()`** (`poke()` then `price()`). Never read `GUARD.lastPrice()` for borrowing, collateral withdrawal or liquidation. `lastPrice()` is for display only.
+2. **Risk-reducing actions never need a price**: `supply`, `depositCollateral`, `repay`. They must keep working while the breaker is tripped.
+3. **`poke()` must never revert.** Source failures are caught and classified. Callers such as the Guardian rely on it to persist a trip.
+4. **No admin keys.** The guard, market and Guardian have no owner. Do not add pause/override/setter functions without an explicit product decision; the absence of an override is part of the security model.
+5. **Quorum is a strict majority** of sources (enforced in the constructor).
+6. **Units**: collateral and `msg.value` are tinybars (8 decimals) inside the EVM; JSON-RPC values are weibars (18). Prices are 18-decimal. The asset (USDC) has 6.
+7. **Hedera system contracts are not available in `forge script` simulation.** Do not call HTS/HSS from `Deploy.s.sol`; put such calls in `setupMarket.js`.
+8. **Only a contract itself can be the auto-renew account** (or treasury/key holder) of a token it creates via HTS. Naming any other account fails with response code 326.
+9. **Guardian scheduling uses a direct CALL to 0x16b**, never DELEGATECALL, and tolerates `block.timestamp` being up to `BLOCK_TIME_TOLERANCE` behind the booked second.
 
-App Router pages live under `packages/nextjs/app/`. Add `"use client"` when the page uses hooks.
+## Adding a price source
 
-Prefer `type` over `interface`. No `T` prefix on types. Let TypeScript infer when it can. Comments should add information.
+1. Create `contracts/oracle/sources/<Name>Source.sol` implementing `IPriceSource`. Revert (with `SourceInvalidAnswer` / `SourceIncompleteRound` or your own error) on data the provider flags as unusable; normalize with `Decimals.toE18` / `Decimals.expToE18`. Do not check staleness: the guard does, using the per-source max age.
+2. Unit-test the adapter against a mock of the provider's interface; if it has a Hedera testnet deployment, add a case to `test/fork/LiveTestnetOracles.t.sol`.
+3. Wire it in `script/Deploy.s.sol` (address per chain + max age) and keep quorum a strict majority.
+4. Add a `useSource(<index>n)` slot in `packages/nextjs/hooks/lending/useOracleGuard.ts`.
+
+## Tests to write for any behaviour change
+
+- Guard changes: `test/OracleGuard.t.sol`, including the fuzz property that a single source can never move the accepted price.
+- Market changes: `test/LendingMarket.t.sol`, plus both breaker tests (price-dependent actions blocked, risk-reducing actions open).
+- Anything touching pricing: rerun `test/BonzoReplay.t.sol`. All four scenarios must keep their outcomes.
+- Guardian changes: `test/Guardian.t.sol`, including "exactly one live schedule chain".
+
+## Frontend conventions
+
+- Scaffold hooks: `useScaffoldReadContract` / `useScaffoldWriteContract` (not the `...ContractRead/Write` names). Pass `watch: false` with a `refetchInterval` for polling reads; Hedera produces a block every ~2 s and block-watching every read floods the RPC.
+- HTS token interactions (balance, allowance, `associate()`, `isAssociated()`) go through `useHtsToken`.
+- History (logs, HCS messages) comes from the mirror node via `utils/lending/mirrorNode.ts`, not `eth_getLogs`.
+- DaisyUI components; `~~` import alias; `type` over `interface`. Format with `npx eslint --fix <files>`: running the prettier CLI directly on `.tsx` can strip TypeScript generics through the import-sort plugin.
+
+## Never
+
+- Commit `.env`, `.env.local`, private keys, or `packages/foundry/deployments/` and `broadcast/` (gitignored).
+- Put a Pyth API key in a `NEXT_PUBLIC_` variable.
+- Hand-edit `deployedContracts.ts`.

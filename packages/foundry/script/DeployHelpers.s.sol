@@ -58,10 +58,24 @@ contract ScaffoldETHDeploy is Script {
         // fetch already existing contracts
         root = vm.projectRoot();
         path = string.concat(root, "/deployments/");
+        // The Makefile creates this folder, but plain `forge script` runs (e.g. Windows without make) do not.
+        vm.createDir(path, true);
         string memory chainIdStr = vm.toString(block.chainid);
         path = string.concat(path, string.concat(chainIdStr, ".json"));
 
         string memory jsonWrite;
+
+        // Keep contracts recorded by earlier runs (e.g. DeployGuardian after Deploy) unless this run
+        // redeployed a contract with the same name.
+        if (vm.exists(path)) {
+            string memory existing = vm.readFile(path);
+            string[] memory keys = vm.parseJsonKeys(existing, "$");
+            for (uint256 i = 0; i < keys.length; i++) {
+                if (bytes(keys[i]).length != 42) continue; // skip "networkName"
+                string memory name = vm.parseJsonString(existing, string.concat(".", keys[i]));
+                if (!_deployedThisRun(name)) vm.serializeString(jsonWrite, keys[i], name);
+            }
+        }
 
         uint256 len = deployments.length;
 
@@ -78,6 +92,27 @@ contract ScaffoldETHDeploy is Script {
         }
         jsonWrite = vm.serializeString(jsonWrite, "networkName", chainName);
         vm.writeJson(jsonWrite, path);
+    }
+
+    function _deployedThisRun(string memory name) private view returns (bool) {
+        for (uint256 i = 0; i < deployments.length; i++) {
+            if (keccak256(bytes(deployments[i].name)) == keccak256(bytes(name))) return true;
+        }
+        return false;
+    }
+
+    /// @notice Address of a contract recorded in deployments/<chainId>.json by an earlier run.
+    function deployedAddress(string memory name) internal view returns (address) {
+        string memory file = string.concat(vm.projectRoot(), "/deployments/", vm.toString(block.chainid), ".json");
+        string memory json = vm.readFile(file);
+        string[] memory keys = vm.parseJsonKeys(json, "$");
+        for (uint256 i = 0; i < keys.length; i++) {
+            if (bytes(keys[i]).length != 42) continue;
+            if (keccak256(bytes(vm.parseJsonString(json, string.concat(".", keys[i])))) == keccak256(bytes(name))) {
+                return vm.parseAddress(keys[i]);
+            }
+        }
+        revert(string.concat(name, " not found in ", file));
     }
 
     function findChainName() public returns (string memory) {

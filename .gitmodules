@@ -10,3 +10,6 @@
 [submodule "packages/foundry/lib/hedera-forking"]
 	path = packages/foundry/lib/hedera-forking
 	url = https://github.com/hashgraph/hedera-forking
+[submodule "packages/foundry/lib/pyth-sdk-solidity"]
+	path = packages/foundry/lib/pyth-sdk-solidity
+	url = https://github.com/pyth-network/pyth-sdk-solidity

@@ -6,14 +6,14 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-hbar/contract";
 
 const deployedContracts = {
   296: {
-    HederaToken: {
-      address: "0xa510c1b5ebcefb83267f4f2bae2765611606c85a",
+    ChainlinkSource: {
+      address: "0x59e0d81d920ed242f8a1dd098cc417f6011597c8",
       abi: [
         {
           type: "constructor",
           inputs: [
             {
-              name: "initialOwner",
+              name: "feed",
               type: "address",
               internalType: "address",
             },
@@ -22,19 +22,109 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "allowance",
-          inputs: [
+          name: "FEED",
+          inputs: [],
+          outputs: [
             {
-              name: "owner",
+              name: "",
               type: "address",
-              internalType: "address",
-            },
-            {
-              name: "spender",
-              type: "address",
-              internalType: "address",
+              internalType: "contract IChainlinkAggregator",
             },
           ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "label",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "latest",
+          inputs: [],
+          outputs: [
+            {
+              name: "priceE18",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "updatedAt",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "error",
+          name: "DecimalsOutOfRange",
+          inputs: [
+            {
+              name: "decimals",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SourceIncompleteRound",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "SourceInvalidAnswer",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 41095565,
+    },
+    SupraSource: {
+      address: "0xdbe89ae3c830bc860353f4ae139fdca1857bbe5d",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "feed",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "pairIndex",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "FEED",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract ISupraSValueFeed",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "PAIR_INDEX",
+          inputs: [],
           outputs: [
             {
               name: "",
@@ -46,22 +136,441 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "approve",
-          inputs: [
+          name: "label",
+          inputs: [],
+          outputs: [
             {
-              name: "spender",
-              type: "address",
-              internalType: "address",
+              name: "",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "latest",
+          inputs: [],
+          outputs: [
+            {
+              name: "priceE18",
+              type: "uint256",
+              internalType: "uint256",
             },
             {
-              name: "value",
+              name: "updatedAt",
               type: "uint256",
               internalType: "uint256",
             },
           ],
+          stateMutability: "view",
+        },
+        {
+          type: "error",
+          name: "DecimalsOutOfRange",
+          inputs: [
+            {
+              name: "decimals",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SourceIncompleteRound",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "SourceInvalidAnswer",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 41095568,
+    },
+    PythSource: {
+      address: "0xf3c3258f97594844637897127efc9637e91ea177",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "pyth",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "priceId",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "maxConfBps",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "MAX_CONF_BPS",
+          inputs: [],
           outputs: [
             {
               name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "PRICE_ID",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "PYTH",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract IPyth",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "label",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "latest",
+          inputs: [],
+          outputs: [
+            {
+              name: "priceE18",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "updatedAt",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "error",
+          name: "DecimalsOutOfRange",
+          inputs: [
+            {
+              name: "decimals",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SourceConfidenceTooWide",
+          inputs: [
+            {
+              name: "confBps",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SourceIncompleteRound",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "SourceInvalidAnswer",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 41095571,
+    },
+    OracleGuard: {
+      address: "0x35987868e2677b7f778888b32c4db30ad812bbe3",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "sources_",
+              type: "address[]",
+              internalType: "contract IPriceSource[]",
+            },
+            {
+              name: "maxAges_",
+              type: "uint256[]",
+              internalType: "uint256[]",
+            },
+            {
+              name: "params",
+              type: "tuple",
+              internalType: "struct OracleGuard.Params",
+              components: [
+                {
+                  name: "quorum",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "maxDeviationBps",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "maxChangeBps",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "cooldown",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "maxPriceAge",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "minPriceE18",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "maxPriceE18",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "COOLDOWN",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "MAX_CHANGE_BPS",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "MAX_DEVIATION_BPS",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "MAX_PRICE_AGE",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "MAX_PRICE_E18",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "MAX_SOURCES",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "MIN_PRICE_E18",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "QUORUM",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "inspect",
+          inputs: [],
+          outputs: [
+            {
+              name: "readings",
+              type: "tuple[]",
+              internalType: "struct OracleGuard.Reading[]",
+              components: [
+                {
+                  name: "priceE18",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "updatedAt",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "status",
+                  type: "uint8",
+                  internalType: "enum OracleGuard.Status",
+                },
+              ],
+            },
+            {
+              name: "median",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "agreeing",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "isTripped",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "lastPrice",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "lastPriceAt",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "poke",
+          inputs: [],
+          outputs: [
+            {
+              name: "healthy",
               type: "bool",
               internalType: "bool",
             },
@@ -70,14 +579,8 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "balanceOf",
-          inputs: [
-            {
-              name: "account",
-              type: "address",
-              internalType: "address",
-            },
-          ],
+          name: "price",
+          inputs: [],
           outputs: [
             {
               name: "",
@@ -89,7 +592,267 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "decimals",
+          name: "sourceAt",
+          inputs: [
+            {
+              name: "index",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "source",
+              type: "address",
+              internalType: "contract IPriceSource",
+            },
+            {
+              name: "maxAge",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "sourceCount",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "tripReason",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint8",
+              internalType: "enum OracleGuard.TripReason",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "trippedAt",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "event",
+          name: "Checked",
+          inputs: [
+            {
+              name: "medianE18",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "agreeing",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "readings",
+              type: "tuple[]",
+              indexed: false,
+              internalType: "struct OracleGuard.Reading[]",
+              components: [
+                {
+                  name: "priceE18",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "updatedAt",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "status",
+                  type: "uint8",
+                  internalType: "enum OracleGuard.Status",
+                },
+              ],
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "PriceAccepted",
+          inputs: [
+            {
+              name: "priceE18",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Reset",
+          inputs: [
+            {
+              name: "priceE18",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Tripped",
+          inputs: [
+            {
+              name: "reason",
+              type: "uint8",
+              indexed: false,
+              internalType: "enum OracleGuard.TripReason",
+            },
+            {
+              name: "medianE18",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "BreakerTripped",
+          inputs: [
+            {
+              name: "reason",
+              type: "uint8",
+              internalType: "enum OracleGuard.TripReason",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "InvalidParams",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "InvalidSources",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "PriceStale",
+          inputs: [
+            {
+              name: "lastAcceptedAt",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 41095574,
+    },
+    LendingMarket: {
+      address: "0x3cd26c4d74ec3e96b190195df2084c63901d03b5",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "asset",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "assetDecimals",
+              type: "uint8",
+              internalType: "uint8",
+            },
+            {
+              name: "guard",
+              type: "address",
+              internalType: "contract OracleGuard",
+            },
+            {
+              name: "risk",
+              type: "tuple",
+              internalType: "struct LendingMarket.RiskParams",
+              components: [
+                {
+                  name: "ltvBps",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "liquidationThresholdBps",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "liquidationBonusBps",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "closeFactorBps",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "baseRatePerSecond",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "slopePerSecond",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "ASSET",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract IERC20",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "ASSET_DECIMALS",
           inputs: [],
           outputs: [
             {
@@ -102,13 +865,148 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "mint",
+          name: "BASE_RATE_PER_SECOND",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "CLOSE_FACTOR_BPS",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "GUARD",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract OracleGuard",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "LIQUIDATION_BONUS_BPS",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "LIQUIDATION_THRESHOLD_BPS",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "LTV_BPS",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "RENEWAL_RESERVE",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "SLOPE_PER_SECOND",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "accounts",
           inputs: [
             {
-              name: "to",
+              name: "borrower",
               type: "address",
               internalType: "address",
             },
+          ],
+          outputs: [
+            {
+              name: "collateral",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "principal",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "index",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "accrueInterest",
+          inputs: [],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "borrow",
+          inputs: [
             {
               name: "amount",
               type: "uint256",
@@ -120,342 +1018,59 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "name",
+          name: "borrowIndex",
           inputs: [],
           outputs: [
             {
               name: "",
-              type: "string",
-              internalType: "string",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           stateMutability: "view",
         },
         {
           type: "function",
-          name: "owner",
+          name: "borrowRatePerSecond",
           inputs: [],
           outputs: [
             {
               name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "debtOf",
+          inputs: [
+            {
+              name: "borrower",
               type: "address",
               internalType: "address",
             },
           ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
           stateMutability: "view",
         },
         {
           type: "function",
-          name: "renounceOwnership",
+          name: "depositCollateral",
           inputs: [],
           outputs: [],
-          stateMutability: "nonpayable",
+          stateMutability: "payable",
         },
         {
           type: "function",
-          name: "symbol",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "string",
-              internalType: "string",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "totalSupply",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "transfer",
-          inputs: [
-            {
-              name: "to",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "transferFrom",
-          inputs: [
-            {
-              name: "from",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "to",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "transferOwnership",
-          inputs: [
-            {
-              name: "newOwner",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "event",
-          name: "Approval",
-          inputs: [
-            {
-              name: "owner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "spender",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "OwnershipTransferred",
-          inputs: [
-            {
-              name: "previousOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "newOwner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "Transfer",
-          inputs: [
-            {
-              name: "from",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "to",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "ERC20InsufficientAllowance",
-          inputs: [
-            {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "allowance",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "needed",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InsufficientBalance",
-          inputs: [
-            {
-              name: "sender",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "balance",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "needed",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidApprover",
-          inputs: [
-            {
-              name: "approver",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidReceiver",
-          inputs: [
-            {
-              name: "receiver",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidSender",
-          inputs: [
-            {
-              name: "sender",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidSpender",
-          inputs: [
-            {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "OwnableInvalidOwner",
-          inputs: [
-            {
-              name: "owner",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "OwnableUnauthorizedAccount",
-          inputs: [
-            {
-              name: "account",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-      ],
-      inheritedFunctions: {},
-      deployedOnBlock: 33578755,
-    },
-    HtsTokenCreator: {
-      address: "0x03fcda15d3955b20557028db9fabe6f5847f00ab",
-      abi: [
-        {
-          type: "function",
-          name: "HTS",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "SUCCESS",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "int64",
-              internalType: "int64",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "createToken",
+          name: "initialize",
           inputs: [
             {
               name: "name",
@@ -467,119 +1082,752 @@ const deployedContracts = {
               type: "string",
               internalType: "string",
             },
-            {
-              name: "initialSupply",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "decimals",
-              type: "uint8",
-              internalType: "uint8",
-            },
           ],
-          outputs: [
-            {
-              name: "tokenAddress",
-              type: "address",
-              internalType: "address",
-            },
-          ],
+          outputs: [],
           stateMutability: "payable",
         },
         {
           type: "function",
-          name: "mintToken",
+          name: "lastAccrual",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "liquidate",
+          inputs: [
+            {
+              name: "borrower",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "repayAmount",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "seized",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "positionAt",
+          inputs: [
+            {
+              name: "borrower",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "price",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "collateral",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "debt",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "maxDebt",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "healthFactorWad",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "repay",
+          inputs: [
+            {
+              name: "borrower",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "amount",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "repaid",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "shareToken",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "supply",
+          inputs: [
+            {
+              name: "assets",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "shares",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "totalAssets",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "totalBorrows",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "totalCollateral",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "utilization",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "withdraw",
+          inputs: [
+            {
+              name: "shares",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "assets",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "withdrawCollateral",
+          inputs: [
+            {
+              name: "amount",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "event",
+          name: "Borrowed",
+          inputs: [
+            {
+              name: "borrower",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "CollateralDeposited",
+          inputs: [
+            {
+              name: "borrower",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "CollateralWithdrawn",
+          inputs: [
+            {
+              name: "borrower",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "InterestAccrued",
+          inputs: [
+            {
+              name: "interest",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "borrowIndex",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Liquidated",
+          inputs: [
+            {
+              name: "liquidator",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "borrower",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "repaid",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "collateralSeized",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "price",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Repaid",
+          inputs: [
+            {
+              name: "payer",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "borrower",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "ShareTokenCreated",
+          inputs: [
+            {
+              name: "shareToken",
+              type: "address",
+              indexed: false,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Supplied",
+          inputs: [
+            {
+              name: "lender",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "assets",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "shares",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Withdrawn",
+          inputs: [
+            {
+              name: "lender",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "assets",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "shares",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "AlreadyInitialized",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "HbarTransferFailed",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "HtsCallFailed",
+          inputs: [
+            {
+              name: "responseCode",
+              type: "int64",
+              internalType: "int64",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "InsufficientCollateral",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "InsufficientLiquidity",
+          inputs: [
+            {
+              name: "available",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "InvalidParams",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "NotInitialized",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "PositionHealthy",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "ReentrancyGuardReentrantCall",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "RepayTooLarge",
+          inputs: [
+            {
+              name: "max",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SafeERC20FailedOperation",
           inputs: [
             {
               name: "token",
               type: "address",
               internalType: "address",
             },
+          ],
+        },
+        {
+          type: "error",
+          name: "Undercollateralized",
+          inputs: [
             {
-              name: "amount",
+              name: "debt",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "maxDebt",
               type: "uint256",
               internalType: "uint256",
             },
           ],
-          outputs: [
+        },
+        {
+          type: "error",
+          name: "ZeroAmount",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 41095577,
+    },
+    Guardian: {
+      address: "0x7922e3b006b5b15e48cea1c974f562fcd15faed3",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
             {
-              name: "newTotalSupply",
-              type: "int64",
-              internalType: "int64",
+              name: "guard",
+              type: "address",
+              internalType: "contract OracleGuard",
+            },
+            {
+              name: "market",
+              type: "address",
+              internalType: "contract LendingMarket",
+            },
+            {
+              name: "interval",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "gasLimit",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           stateMutability: "nonpayable",
         },
         {
-          type: "event",
-          name: "TokenCreated",
-          inputs: [
+          type: "receive",
+          stateMutability: "payable",
+        },
+        {
+          type: "function",
+          name: "BLOCK_TIME_TOLERANCE",
+          inputs: [],
+          outputs: [
             {
-              name: "tokenAddress",
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "GAS_LIMIT",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "GUARD",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
               type: "address",
-              indexed: true,
+              internalType: "contract OracleGuard",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "INTERVAL",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "MARKET",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract LendingMarket",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "nextRunAt",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "nextSchedule",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
               internalType: "address",
             },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "runs",
+          inputs: [],
+          outputs: [
             {
-              name: "name",
-              type: "string",
-              indexed: false,
-              internalType: "string",
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
             },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "start",
+          inputs: [],
+          outputs: [],
+          stateMutability: "payable",
+        },
+        {
+          type: "function",
+          name: "tick",
+          inputs: [],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "event",
+          name: "ScheduleFailed",
+          inputs: [
             {
-              name: "symbol",
-              type: "string",
+              name: "responseCode",
+              type: "int64",
               indexed: false,
-              internalType: "string",
+              internalType: "int64",
             },
           ],
           anonymous: false,
         },
         {
           type: "event",
-          name: "TokenMinted",
+          name: "Scheduled",
           inputs: [
             {
-              name: "tokenAddress",
+              name: "schedule",
               type: "address",
-              indexed: true,
+              indexed: false,
               internalType: "address",
             },
             {
-              name: "newTotalSupply",
-              type: "int64",
+              name: "runAt",
+              type: "uint256",
               indexed: false,
-              internalType: "int64",
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "Ticked",
+          inputs: [
+            {
+              name: "run",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "healthy",
+              type: "bool",
+              indexed: false,
+              internalType: "bool",
             },
           ],
           anonymous: false,
         },
         {
           type: "error",
-          name: "HtsCreateFailed",
+          name: "AlreadyRunning",
           inputs: [
             {
-              name: "responseCode",
-              type: "int64",
-              internalType: "int64",
+              name: "nextRunAt",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
         },
         {
           type: "error",
-          name: "HtsMintFailed",
-          inputs: [
-            {
-              name: "responseCode",
-              type: "int64",
-              internalType: "int64",
-            },
-          ],
+          name: "InvalidParams",
+          inputs: [],
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 33578759,
+      deployedOnBlock: 41097795,
     },
   },
 } as const;

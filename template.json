@@ -1,0 +1,47 @@
+{
+  "name": "guarded-lending",
+  "description": "Oracle-guarded lending market on Hedera: HBAR collateral, USDC loans, Chainlink + Supra + Pyth consensus with a circuit breaker, an HTS receipt token, a keeperless HIP-1215 Guardian and an HCS audit log.",
+  "version": "1.0.0",
+  "create-scaffold-hbar": {
+    "capabilities": {
+      "frontend": ["nextjs-app"],
+      "solidityFramework": ["foundry"],
+      "packageManager": ["npm"]
+    },
+    "defaults": {
+      "frontend": "nextjs-app",
+      "solidityFramework": "foundry",
+      "packageManager": "npm"
+    },
+    "requirements": {
+      "node": ">=20.18.3"
+    },
+    "outro": {
+      "sections": [
+        {
+          "title": "See it running against the shared testnet deployment",
+          "steps": [
+            { "command": "{run:next:dev}", "text": "Opens http://localhost:3000 wired to the live testnet market." }
+          ]
+        },
+        {
+          "title": "Test and deploy your own",
+          "steps": [
+            { "label": "Unit tests, including the Bonzo exploit replay", "command": "{run:foundry:test}" },
+            { "label": "Live oracle check against Hedera testnet", "command": "{run:foundry:test:testnet}" },
+            {
+              "label": "Import a funded testnet key, then deploy and set up",
+              "text": "See README.md \"Deploy your own\" for the three commands."
+            }
+          ]
+        },
+        {
+          "title": "Read first",
+          "steps": [
+            { "text": "README.md explains the oracle guard and the exploit it defends against; AGENTS.md is the guide for AI coding agents." }
+          ]
+        }
+      ]
+    }
+  }
+}

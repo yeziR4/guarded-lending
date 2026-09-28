@@ -2,3 +2,4 @@
 forge-std/=lib/forge-std/src/
 solidity-bytes-utils/=lib/solidity-bytes-utils/contracts/
 hedera-forking/=lib/hedera-forking/contracts/
+@pythnetwork/pyth-sdk-solidity/=lib/pyth-sdk-solidity/

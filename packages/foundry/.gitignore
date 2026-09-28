@@ -18,3 +18,5 @@ nextjs.args/contracts/deployedContracts.ts
 
 # Local Cursor IDE config
 .cursor/
+# HCS relayer cursor (last relayed consensus timestamp)
+.relay-cursor-*.json

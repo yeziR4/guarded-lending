@@ -11,6 +11,7 @@
     "clean": "forge clean",
     "compile": "make compile",
     "deploy": "node scripts-js/parseArgs.js",
+    "setup": "node scripts-js/setupMarket.js",
     "flatten": "make flatten",
     "fork": "make fork",
     "format": "make format",
@@ -22,7 +23,8 @@
     "test:mainnet": "forge test --fork-url https://mainnet.hashio.io/api --chain-id 295 --ffi",
     "verify:testnet": "forge verify-contract --chain-id 296 --verifier sourcify",
     "verify:mainnet": "forge verify-contract --chain-id 295 --verifier sourcify",
-    "postinstall": "shx cp -n .env.example .env"
+    "postinstall": "shx cp -n .env.example .env",
+    "relay": "node scripts-js/hcsRelay.js"
   },
   "dependencies": {
     "dotenv": "~16.3.1",
@@ -30,7 +32,8 @@
     "ethers": "~5.7.1",
     "prettier": "~2.8.8",
     "qrcode": "~1.5.3",
-    "toml": "~3.0.0"
+    "toml": "~3.0.0",
+    "@hiero-ledger/sdk": "^2.80.0"
   },
   "devDependencies": {
     "shx": "^0.3.4"

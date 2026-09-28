@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  contracts:
+    name: Contracts (format, build, unit tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/foundry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: forge fmt --check
+      - run: forge build --sizes
+      - run: forge test -vv
+
+  live-oracles:
+    name: Live testnet oracle check
+    runs-on: ubuntu-latest
+    # Talks to Hedera testnet; informative on PRs, never blocks them on network weather.
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: packages/foundry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: forge test --match-path "test/fork/*" --fork-url https://testnet.hashio.io/api --chain-id 296 -vv
+
+  frontend:
+    name: Frontend (lint, types, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run next:check-types
+      - run: npm run next:build
+
+  gate:
+    name: Bounty gate (fresh scaffold from this commit)
+    runs-on: ubuntu-latest
+    # Scaffolds through the public CLI from GitHub, so it needs the commit to be pushed and public.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Scaffold, install, lint, build, boot and probe routes
+        run: bash scripts/check-gate.sh "${{ github.repository }}#${{ github.sha }}"
