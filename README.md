@@ -189,7 +189,7 @@ Unit tests replace HTS (`0x167`) and HSS (`0x16b`) with small mocks (`test/mocks
 | OracleGuard | [`0x35987868E2677B7F778888B32c4db30Ad812BbE3`](https://hashscan.io/testnet/contract/0x35987868E2677B7F778888B32c4db30Ad812BbE3) |
 | LendingMarket | [`0x3cd26C4d74Ec3e96b190195Df2084C63901d03b5`](https://hashscan.io/testnet/contract/0x3cd26C4d74Ec3e96b190195Df2084C63901d03b5) |
 | gUSDC (HTS) | [`0.0.10760610`](https://hashscan.io/testnet/token/0.0.10760610) |
-| Guardian | [`0x7922e3B006B5b15E48cEA1C974F562fCd15FaEd3`](https://hashscan.io/testnet/contract/0x7922e3B006B5b15E48cEA1C974F562fCd15FaEd3) |
+| Guardian | [`0xda970AfF580EF5D0D917b94aa552921B8166B8B1`](https://hashscan.io/testnet/contract/0xda970AfF580EF5D0D917b94aa552921B8166B8B1) |
 
 Proof-of-transaction (the market's first live oracle check):
 [`0x3d6df3cf…d19a`](https://hashscan.io/testnet/tx/0x3d6df3cfde1e2f726d939996dfb3774d1499d9dad50db37bf7e1deaaab61d19a)

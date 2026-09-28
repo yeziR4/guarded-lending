@@ -1608,7 +1608,7 @@ const deployedContracts = {
       deployedOnBlock: 41095577,
     },
     Guardian: {
-      address: "0x7922e3b006b5b15e48cea1c974f562fcd15faed3",
+      address: "0xda970aff580ef5d0d917b94aa552921b8166b8b1",
       abi: [
         {
           type: "constructor",
@@ -1701,6 +1701,32 @@ const deployedContracts = {
               name: "",
               type: "address",
               internalType: "contract LendingMarket",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "NO_CAPACITY",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "int64",
+              internalType: "int64",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "SCHEDULE_CALL_REVERTED",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "int64",
+              internalType: "int64",
             },
           ],
           stateMutability: "view",
@@ -1827,7 +1853,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41097795,
+      deployedOnBlock: 41100146,
     },
   },
 } as const;
