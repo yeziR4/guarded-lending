@@ -2,10 +2,8 @@
 
 import { useBalance } from "wagmi";
 import { useDeployedContractInfo, useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-hbar";
-import { WEIBAR_PER_TINYBAR, formatHbar } from "~~/utils/lending/format";
+import { POLLED, POLL_MS, WEIBAR_PER_TINYBAR, formatHbar } from "~~/utils/lending/format";
 import { hashscanUrl } from "~~/utils/lending/mirrorNode";
-
-const POLL = { watch: false, query: { refetchInterval: 15_000 } } as const;
 
 /** Long-zero EVM addresses (0x000…00a431e9) map to Hedera entity ids (0.0.10760681). */
 const toEntityId = (address: string) => `0.0.${BigInt(address).toString()}`;
@@ -13,13 +11,17 @@ const toEntityId = (address: string) => `0.0.${BigInt(address).toString()}`;
 export const GuardianCard = () => {
   const { targetNetwork } = useTargetNetwork();
   const { data: guardian } = useDeployedContractInfo({ contractName: "Guardian" });
-  const { data: balance } = useBalance({ address: guardian?.address, query: { refetchInterval: 15_000 } });
-  const { data: runs } = useScaffoldReadContract({ contractName: "Guardian", functionName: "runs", ...POLL });
-  const { data: nextRunAt } = useScaffoldReadContract({ contractName: "Guardian", functionName: "nextRunAt", ...POLL });
+  const { data: balance } = useBalance({ address: guardian?.address, query: { refetchInterval: POLL_MS } });
+  const { data: runs } = useScaffoldReadContract({ contractName: "Guardian", functionName: "runs", ...POLLED });
+  const { data: nextRunAt } = useScaffoldReadContract({
+    contractName: "Guardian",
+    functionName: "nextRunAt",
+    ...POLLED,
+  });
   const { data: nextSchedule } = useScaffoldReadContract({
     contractName: "Guardian",
     functionName: "nextSchedule",
-    ...POLL,
+    ...POLLED,
   });
   const { data: interval } = useScaffoldReadContract({
     contractName: "Guardian",

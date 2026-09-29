@@ -64,8 +64,7 @@ contract GuardianTest is MarketFixture {
         assertEq(hss.scheduled(), 1, "early manual tick must not book a second chain");
     }
 
-    /// Regression for the live testnet run: the scheduled call executed at its booked second, but inside
-    /// a record block whose `block.timestamp` was earlier, so the loop did not reschedule.
+    /// A scheduled execution can see a block time slightly before its booked second.
     function test_tick_scheduledExecutionSeesEarlierBlockTime_stillReschedules() public {
         guardian.start();
         vm.warp(block.timestamp + INTERVAL - 2);
@@ -119,8 +118,7 @@ contract GuardianTest is MarketFixture {
         assertEq(hss.scheduled(), 2);
     }
 
-    /// Regression for the live testnet run: with a 400k gas limit the scheduled tick ran out of gas inside
-    /// scheduleCall and reverted, discarding its oracle check. Booking failures must not undo the tick.
+    /// A booking that runs out of gas must not undo the tick's oracle check.
     function test_tick_bookingOutOfGas_keepsCheckAndStopsLoop() public {
         guardian.start();
         hss.setExhaustGas(true);

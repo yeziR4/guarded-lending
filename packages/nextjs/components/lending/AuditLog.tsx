@@ -2,15 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
+import { POLL_MS } from "~~/utils/lending/format";
 import { fetchTopicMessages, hashscanUrl } from "~~/utils/lending/mirrorNode";
 
-/**
- * Audit topic for the shared deployment in deployedContracts.ts, so a fresh scaffold shows a live log.
- * Set NEXT_PUBLIC_AUDIT_TOPIC_ID to the topic your own relayer created.
- */
+/** Topic of the shared deployment in deployedContracts.ts; override with NEXT_PUBLIC_AUDIT_TOPIC_ID. */
 const SHARED_AUDIT_TOPICS: Record<number, string> = { 296: "0.0.10772847" };
 
-/** Shape of the messages the relayer (`packages/foundry/scripts-js/hcsRelay.js`) publishes. */
+/** Published by packages/foundry/scripts-js/hcsRelay.js. */
 type AuditEntry = {
   event: "Checked" | "Tripped" | "Reset";
   median?: string;
@@ -30,18 +28,13 @@ const parse = (raw: string): AuditEntry | undefined => {
 
 const EVENT_BADGE = { Checked: "badge-ghost", Tripped: "badge-error", Reset: "badge-success" } as const;
 
-/**
- * Every guard decision, mirrored to a Hedera Consensus Service topic. HCS gives the log a consensus
- * timestamp and fixed order that nobody (including this app's operator) can rewrite, so a post-mortem
- * starts from a verifiable record of what each oracle reported.
- */
 export const AuditLog = () => {
   const { targetNetwork } = useTargetNetwork();
   const topicId = process.env.NEXT_PUBLIC_AUDIT_TOPIC_ID || SHARED_AUDIT_TOPICS[targetNetwork.id];
   const { data, isLoading, error } = useQuery({
     queryKey: ["audit", targetNetwork.id, topicId],
     enabled: Boolean(topicId),
-    refetchInterval: 15_000,
+    refetchInterval: POLL_MS,
     queryFn: () => fetchTopicMessages(targetNetwork.id, topicId as string),
   });
 

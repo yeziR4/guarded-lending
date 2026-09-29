@@ -1,8 +1,7 @@
 import type { Address } from "viem";
 import { useAccount } from "wagmi";
 import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-hbar";
-
-const POLL = { watch: false, query: { refetchInterval: 10_000 } } as const;
+import { POLLED, POLL_MS } from "~~/utils/lending/format";
 
 /** Market-wide figures plus the connected wallet's position, priced at the guard's last accepted price. */
 export const useMarket = () => {
@@ -15,30 +14,38 @@ export const useMarket = () => {
     functionName: "shareToken",
     watch: false,
   });
-  const totalAssets = useScaffoldReadContract({ contractName: "LendingMarket", functionName: "totalAssets", ...POLL });
+  const totalAssets = useScaffoldReadContract({
+    contractName: "LendingMarket",
+    functionName: "totalAssets",
+    ...POLLED,
+  });
   const totalBorrows = useScaffoldReadContract({
     contractName: "LendingMarket",
     functionName: "totalBorrows",
-    ...POLL,
+    ...POLLED,
   });
   const totalCollateral = useScaffoldReadContract({
     contractName: "LendingMarket",
     functionName: "totalCollateral",
-    ...POLL,
+    ...POLLED,
   });
-  const utilization = useScaffoldReadContract({ contractName: "LendingMarket", functionName: "utilization", ...POLL });
+  const utilization = useScaffoldReadContract({
+    contractName: "LendingMarket",
+    functionName: "utilization",
+    ...POLLED,
+  });
   const borrowRate = useScaffoldReadContract({
     contractName: "LendingMarket",
     functionName: "borrowRatePerSecond",
-    ...POLL,
+    ...POLLED,
   });
-  const lastPrice = useScaffoldReadContract({ contractName: "OracleGuard", functionName: "lastPrice", ...POLL });
+  const lastPrice = useScaffoldReadContract({ contractName: "OracleGuard", functionName: "lastPrice", ...POLLED });
   const position = useScaffoldReadContract({
     contractName: "LendingMarket",
     functionName: "positionAt",
     args: [address, lastPrice.data],
     watch: false,
-    query: { enabled: Boolean(address && lastPrice.data), refetchInterval: 10_000 },
+    query: { enabled: Boolean(address && lastPrice.data), refetchInterval: POLL_MS },
   });
 
   const [collateral, debt, maxDebt, healthFactor] = position.data ?? [0n, 0n, 0n, 0n];

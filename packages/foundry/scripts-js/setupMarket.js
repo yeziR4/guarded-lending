@@ -1,13 +1,8 @@
 /**
- * Post-deploy setup for the guarded lending market. Runs the three calls that touch Hedera system
- * contracts and therefore cannot run inside Forge's local script simulation:
+ * Post-deploy calls that need HTS/HSS, which forge script simulation lacks: create the receipt token,
+ * take the first price, start the Guardian. Idempotent.
  *
- *   1. LendingMarket.initialize  -> HTS: associate USDC, create the gUSDC receipt token
- *   2. OracleGuard.poke          -> first accepted price
- *   3. Guardian.start            -> HSS: book the first scheduled tick (HIP-1215)
- *
- * Usage: npm run setup -- --network hedera_testnet --keystore <name>
- * Set ETH_PASSWORD to avoid three keystore password prompts.
+ * Usage: npm run setup -- --network hedera_testnet --keystore <name> [--guardian-funding 20]
  */
 import { spawnSync } from "child_process";
 import { config } from "dotenv";
@@ -136,7 +131,6 @@ function call(to, signature) {
   return result.stdout.trim().split(" ")[0];
 }
 
-// Each step checks on-chain state first, so the script is safe to re-run after a partial failure.
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 if (call(byName.LendingMarket, "shareToken()(address)") === ZERO_ADDRESS) {

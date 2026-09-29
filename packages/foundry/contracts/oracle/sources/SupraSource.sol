@@ -16,9 +16,7 @@ interface ISupraSValueFeed {
 }
 
 /// @title SupraSource
-/// @notice Reads a Supra push-oracle pair (e.g. HBAR/USDT, pair index 75).
-/// @dev Supra quotes HBAR against USDT rather than USD. The guard's deviation tolerance absorbs the
-///      small USDT/USD basis; a depeg large enough to matter shows up as this source disagreeing.
+/// @notice Supra push-oracle pair. On Hedera HBAR is quoted in USDT; the guard's tolerance absorbs the basis.
 contract SupraSource is IPriceSource {
     /// @dev Supra on Hedera reports millisecond timestamps.
     uint256 private constant MS_PER_SECOND = 1000;

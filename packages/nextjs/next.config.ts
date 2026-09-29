@@ -13,8 +13,7 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { dev }) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
-    // Optional peer dependencies of @coinbase/cdp-sdk (pulled in via wagmi's Base Account connector)
-    // that it imports unconditionally. This app never uses x402 payments, so resolve them to empty modules.
+    // Optional peers that @coinbase/cdp-sdk (via wagmi) imports unconditionally; unused here.
     config.resolve.alias = {
       ...config.resolve.alias,
       "@x402/core": false,

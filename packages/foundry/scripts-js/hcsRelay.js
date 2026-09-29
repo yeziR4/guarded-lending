@@ -1,12 +1,8 @@
 /**
- * Mirrors every OracleGuard decision to a Hedera Consensus Service topic.
+ * Mirrors OracleGuard decisions to an HCS topic that only this relayer can write to.
  *
- * The guard's events already live on-chain, but HCS turns them into an ordered, consensus-timestamped
- * audit log with its own identity: one topic per market, readable by anyone through the mirror node,
- * with a submit key so only this relayer can write to it. The dashboard's "Oracle audit log" reads it.
- *
- * Usage: npm run relay -- --keystore <name> [--network hedera_testnet] [--topic 0.0.x] [--interval 30]
- * First run without --topic (or AUDIT_TOPIC_ID) creates the topic and prints its id.
+ * Usage: npm run relay -- --keystore <name> [--topic 0.0.x] [--network hedera_testnet] [--interval 30]
+ * Without --topic (or AUDIT_TOPIC_ID) it creates one and prints its id.
  */
 import {
   AccountId,
@@ -136,7 +132,7 @@ for (let i = 0; i < (await guard.sourceCount()).toNumber(); i++) {
   labels.push(await new ethers.Contract(source, labelAbi, provider).label());
 }
 
-// The cursor (last relayed consensus timestamp) survives restarts so no event is published twice.
+// Last relayed timestamp, so restarts never publish an event twice.
 const cursorPath = join(
   __dirname,
   "..",

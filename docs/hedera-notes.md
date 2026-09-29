@@ -1,64 +1,43 @@
-# Hedera notes: things that behave differently
+# Hedera notes
 
-Each item here cost real debugging time while building this template on testnet. The code already handles all of them; this page explains why it looks the way it does.
+Places where Hedera behaves differently from other EVM chains, and what this template does about each one.
 
 ## Pin Foundry below 1.8
 
-Foundry 1.8.x's fork backend sends EIP-1898 block objects (`{"blockHash": ...}`) for state reads. The Hiero JSON-RPC relay behind Hashio and other public Hedera endpoints only accepts a block number or tag, and answers `-32602 Invalid parameter 1: ... [object Object]`. Every `forge script` (which simulates against a fork) and every `--fork-url` test hits this. We reproduced it on 1.8.3; Foundry 1.5.1 and 1.7.1 send `"latest"` and work ([lattice#227](https://github.com/dadadave80/lattice/issues/227)).
+Foundry 1.8 sends EIP-1898 block objects for state reads, and the Hedera JSON-RPC relay rejects them with `-32602 Invalid parameter 1: ... [object Object]`. That breaks every `forge script` and every `--fork-url` test; offline `forge test` is unaffected. Use `foundryup --install v1.5.1` (1.7.1 also works). CI pins 1.5.1. See [lattice#227](https://github.com/dadadave80/lattice/issues/227).
 
-```bash
-foundryup --install v1.5.1
-```
+## Two units for HBAR
 
-CI pins the same version. Offline unit tests (`forge test` without `--fork-url`) are unaffected.
+Inside the EVM (`msg.value`, balances, storage) HBAR is **tinybars**, with 8 decimals. Over JSON-RPC it is **weibars**, with 18 decimals. The market stores tinybars, and the frontend multiplies by 10¹⁰ (`WEIBAR_PER_TINYBAR`) when sending value. `cast send --value 30ether` sends 30 HBAR.
 
-## HBAR has two units depending on where you are
+## Token association
 
-| Where | Unit | Decimals |
-| --- | --- | --- |
-| Inside the EVM (`msg.value`, `address.balance`, contract storage) | tinybar | 8 |
-| JSON-RPC (`value` in a transaction, `eth_getBalance`) | weibar | 18 |
+An account must associate with an HTS token before it can receive it. HTS tokens expose IHRC-719 `associate()` on their EVM address, so a normal wallet can do it in one call. The dashboard shows an "Associate" button when `isAssociated()` returns false. That call reads the caller's own status, so it is sent `from` the connected account.
 
-1 tinybar = 10¹⁰ weibar. `LendingMarket` stores collateral in tinybars. The frontend sends `value: tinybars * 10n ** 10n` (`WEIBAR_PER_TINYBAR` in `utils/lending/format.ts`). `cast send --value 30ether` means 30 HBAR.
+## A contract can only sign for itself in an HTS call
 
-## Accounts must associate before holding a token
+When a contract creates a token, every account it names (auto-renew, treasury, keys) must sign. The contract can only provide its own signature, so naming any other account fails with **326 `INVALID_FULL_PREFIX_SIGNATURE_FOR_PRECOMPILE`**. The market is therefore its own auto-renew account and keeps a 1 HBAR `RENEWAL_RESERVE`, so renewals never touch collateral.
 
-An account cannot receive an HTS token it has not associated with. Every HTS token exposes IHRC-719 on its EVM facade, so a MetaMask-style wallet can call `associate()` on the token address directly. The dashboard checks `isAssociated()` (a view that reads the *caller's* status, so the read is sent `from` the connected account) and shows an "Associate" button when needed. The market associates itself with USDC in `initialize()`.
+## No HTS or HSS in `forge script` simulation
 
-## A contract can only sign for itself inside an HTS call
+`forge script` runs locally before broadcasting, and the system contracts `0x167` (HTS) and `0x16b` (HSS) do not exist there. Even `decimals()` on an HTS token fails. So `Deploy.s.sol` only deploys contracts, and `setupMarket.js` sends the HTS/HSS calls afterwards. `cast send` exits 0 on a reverted transaction, so the script checks the receipt status itself.
 
-Our first `initialize()` named the caller's wallet as the new token's auto-renew account. HTS rejected the creation with response code **326, `INVALID_FULL_PREFIX_SIGNATURE_FOR_PRECOMPILE`**. Naming an account in a token-creation call requires that account's signature, and a contract calling the precompile can only provide its own. The market is therefore its own auto-renew account and keeps a 1 HBAR `RENEWAL_RESERVE` so renewal fees never come out of borrowers' collateral. The HTS mock in `test/mocks/MockHts.sol` enforces this rule, so the regression is covered offline.
+## Scheduled calls (HIP-1215)
 
-## HTS and HSS do not exist in Forge's local simulation
+- **`block.timestamp` can be earlier than the booked second.** It reports the start of Hedera's ~2 s record block. The Guardian allows 10 s of tolerance.
+- **Booking costs about 1.4M gas**, because the schedule fee is charged as gas. A tick that books its successor needs a gas limit ≥ 1.6M. The Guardian books inside a `try/catch`, so a failed booking stops the loop without undoing the oracle check. Each tick costs about 1.7 HBAR on testnet, and Hedera charges at least 80% of the gas limit.
+- **Call `0x16b` directly.** Scheduling from a DELEGATECALL frame fails at execution on testnet ([hiero-consensus-node#27263](https://github.com/hiero-ledger/hiero-consensus-node/issues/27263)).
 
-`forge script` executes the script locally before broadcasting. The system contracts at `0x167` (HTS) and `0x16b` (HSS) have no code there, so any call into them fails in simulation. Even `IERC20(usdc).decimals()` on an HTS token fails, because the token's EVM facade delegates to `0x167`. Two consequences:
+## History comes from the mirror node
 
-- `Deploy.s.sol` only deploys contracts. The market takes the asset's decimals as a constructor argument instead of reading them.
-- The HTS/HSS calls (`initialize`, `Guardian.start`) run afterwards as plain transactions from `scripts-js/setupMarket.js`.
+Public relays limit `eth_getLogs` ranges, so the dashboard reads logs and HCS messages from the mirror node REST API. The mirror node only filters logs by topic inside a timestamp range, so `fetchContractLogs` pages through a contract's logs and filters client-side.
 
-`cast send` exits 0 even when the transaction reverts, so the setup script checks the receipt status itself.
+## Pyth needs an API key
 
-## `block.timestamp` is the start of the record block
+Since 26 Aug 2026 Hermes (`pyth.dourolabs.app/hermes`) needs `Authorization: Bearer <key>`. `/api/pyth-update` keeps the key server-side. The on-chain Pyth address on Hedera is unchanged.
 
-The first live Guardian booked its tick for second 1790605316. HSS executed it on time, at consensus timestamp 1790605316.07, but inside a record block that had started a second or two earlier. `block.timestamp` reports the block start, so the Guardian saw a time *before* `nextRunAt`, decided the run was early, and did not book the next one. `Guardian.BLOCK_TIME_TOLERANCE` (10 s) fixes this, and `test_tick_scheduledExecutionSeesEarlierBlockTime_stillReschedules` pins the regression.
+## Base-stack fixes in this template
 
-## HIP-1215 scheduled calls: what to expect
-
-- **Booking a schedule is expensive in gas.** `scheduleCall` charges the schedule fee as gas: about 1.4M. Our first fixed Guardian had a 400k tick limit. Its scheduled tick used 396,552 gas, ran out inside `scheduleCall` while booking the next run, and reverted, taking the tick's oracle check with it. Now the tick limit defaults to 2M, and booking runs in a `try/catch` that keeps gas back, so a failed booking emits `ScheduleFailed` and stops the loop cleanly instead of reverting the tick.
-- The scheduling contract pays for execution. A self-rescheduling tick costs about 1.7 HBAR on testnet, which is why the default interval is 6 hours. Hedera charges at least 80% of the gas limit, so don't set it far above what is used.
-- Schedule from a direct `CALL` to `0x16b`. Scheduling from a `DELEGATECALL` frame currently fails at execution on testnet ([hiero-consensus-node#27263](https://github.com/hiero-ledger/hiero-consensus-node/issues/27263)).
-- A booked schedule is its own entity (`0.0.x`) and is visible on HashScan with its execution timestamp.
-
-## Read history from the mirror node, not `eth_getLogs`
-
-Public relays such as Hashio limit `eth_getLogs` to narrow block ranges. The mirror node REST API is the Hedera-native way to read history, with one catch: it only filters logs by topic inside an explicit timestamp range. `fetchContractLogs` therefore pages through a contract's logs and filters client-side. The relayer uses a `timestamp=gt:<cursor>` range, which is allowed.
-
-## Pyth needs an API key since 26 Aug 2026
-
-Hermes (`pyth.dourolabs.app/hermes`) requires `Authorization: Bearer <key>`. The key must stay server-side, so the dashboard fetches update data through `/api/pyth-update`. The on-chain Pyth contract address on Hedera did not change; it was upgraded in place.
-
-## Build and lint pitfalls in the base stack
-
-- `@coinbase/cdp-sdk` (pulled in by wagmi's Base Account connector) imports optional `@x402/*` peers unconditionally, which breaks `next build` when they are not installed. `next.config.ts` aliases them to empty modules.
-- npm hoists the frontend's prettier plugins to the root `node_modules`, and prettier 2 auto-loads them, so the Foundry package's `prettier --check` failed on untouched files. The Makefile passes `--no-plugin-search`.
-- On Windows: PowerShell may block `npm.ps1` (use `npm.cmd`), `make` is not installed by default (use the plain `forge` commands in the README), and `forge install` writes backslashes into `foundry.lock` keys. They must be `lib/<name>`, or scaffold-hbar cannot pin the library version.
+- `create-scaffold-hbar` runs `npm run format` after install. With two prettier versions installed, the import-sort plugin corrupted TypeScript (`[K in keyof T]` became `[ in ]`). The workspaces now share prettier 3.
+- `@coinbase/cdp-sdk`, pulled in through wagmi, imports optional `@x402/*` packages. `next.config.ts` aliases them to empty modules so `next build` works.
+- On Windows, `forge install` writes `lib\\name` keys into `foundry.lock`. They must be `lib/name`, or the CLI cannot pin library versions.

@@ -8,8 +8,7 @@ import { ChainlinkSource } from "../../contracts/oracle/sources/ChainlinkSource.
 import { SupraSource } from "../../contracts/oracle/sources/SupraSource.sol";
 import { PythSource } from "../../contracts/oracle/sources/PythSource.sol";
 
-/// @notice Runs the real sources and guard against live Hedera testnet feeds.
-///         `npm run foundry:test:testnet` (skipped in the default offline `forge test`).
+/// @notice Real sources and guard against live testnet feeds. Skipped unless forked (`test:testnet`).
 contract LiveTestnetOraclesTest is Test {
     address internal constant CHAINLINK_HBAR_USD = 0x59bC155EB6c6C415fE43255aF66EcF0523c92B4a;
     address internal constant SUPRA_PUSH_ORACLE = 0x6Cd59830AAD978446e6cc7f6cc173aF7656Fb917;

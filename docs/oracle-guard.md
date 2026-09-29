@@ -1,67 +1,51 @@
 # How the oracle guard decides
 
-`OracleGuard` turns several independent price providers into one price a lending market can trust, and refuses to produce a price when it cannot.
+Each `poke()` reads every source and classifies it:
 
-## The checks, in order
-
-Every `poke()` reads all sources (`inspect()` does the same without writing state) and classifies each reading:
-
-| # | Check | Outcome for that source | Why |
-| --- | --- | --- | --- |
-| 1 | The source reverts (non-positive answer, incomplete round, Pyth confidence too wide) | `Reverted` | Provider-level sanity lives in each adapter, so provider quirks never leak into the guard |
-| 2 | Older than the source's own max age | `Stale` | Providers update on different cadences: Chainlink testnet every few minutes, Supra about hourly, Pyth only when pushed |
-| 3 | Outside `[minPrice, maxPrice]` | `OutOfBounds` | A 10¹² forgery is rejected here, before any statistics |
-| 4 | More than `maxDeviationBps` from the median of the survivors | `Outlier` | One provider disagreeing with the rest is ignored, not averaged in |
-
-Then the guard decides:
-
-| Condition | Result |
+| Status | When |
 | --- | --- |
-| Fewer than `quorum` sources agree | **Trip**: `NoQuorum` |
-| The median moved more than `maxChangeBps` since the last accepted price | **Trip**: `ExcessiveChange` |
-| Otherwise | **Accept** the median as `lastPrice` |
+| `Reverted` | The adapter rejected the data (non-positive price, incomplete round, Pyth confidence too wide) |
+| `Stale` | Older than that source's max age |
+| `OutOfBounds` | Outside `[minPrice, maxPrice]` |
+| `Outlier` | Further than `maxDeviationBps` from the median of the remaining sources |
+| `Ok` | Counts towards the quorum |
 
-While tripped, `price()` reverts with `BreakerTripped(reason)`. Every consumer fails closed by default, because using the price means calling `price()`.
+Then it decides:
+- **Fewer than `quorum` sources agree:** trip, reason `NoQuorum`.
+- **The median moved more than `maxChangeBps` since the last accepted price:** trip, reason `ExcessiveChange`.
+- **Otherwise:** accept the median.
 
-### Recovery
+While tripped, `price()` reverts, so every consumer fails closed. The breaker resets itself after a full `cooldown` in which every check reaches quorum, and it re-anchors on the new median, so a genuine crash stops the market briefly instead of freezing it for good. There is no admin override.
 
-A tripped breaker resets itself when the sources have reached quorum on every check for a full `cooldown`. Any unhealthy check during the cooldown restarts it. On reset, the guard **re-anchors** on the new median: after a genuine 30% crash, the breaker trips on `ExcessiveChange`, waits out the cooldown while all providers agree on the new level, then accepts it. Without re-anchoring, the change limit would compare every future price to the pre-crash anchor and the market would stay frozen forever.
+## Defaults
 
-There is no owner, no pause key and no manual override. Sources and parameters are fixed at deployment. To change them, deploy a new guard and a new market.
-
-## Why these defaults
-
-| Parameter | Default | Reasoning |
+| Parameter | Default | Reason |
 | --- | --- | --- |
-| Quorum | 2 of 3 | A strict majority. The constructor rejects any quorum that would let two disjoint groups both qualify |
-| Max deviation | 5% | On testnet, Chainlink (USD) and Supra (USDT) routinely sit 1–3% apart. 5% leaves room for that basis without letting a meaningful forgery through |
-| Max change per check | 20% | HBAR has moved more than 20% in a day, but rarely between two checks an hour apart. A bigger move trips, waits and re-anchors |
-| Cooldown | 30 min | Long enough for a transient oracle fault to show itself, short enough not to strand borrowers |
-| Bounds | $0.001 to $100 | Orders of magnitude around any plausible HBAR price. They exist to stop absurd values, not to express a view |
-| Max price age (market) | 2 h | The Guardian refreshes hourly; the market also refreshes on every priced action |
+| Quorum | 2 of 3 | A strict majority, enforced by the constructor |
+| Max deviation | 5% | Chainlink (USD) and Supra (USDT) routinely sit 1–3% apart on testnet |
+| Max change per check | 20% | A bigger move trips, waits out the cooldown and re-anchors |
+| Cooldown | 30 min | Long enough for a transient fault to show, short enough not to strand borrowers |
+| Bounds | $0.001 to $100 | Only there to stop absurd values |
 
-## The Bonzo Lend incident, replayed
+## The Bonzo Lend replay
 
-**What happened (11 July 2026).** The attacker deposited about 250 SAUCE (a few dollars), then submitted a Supra price update whose BLS signature was all zeros. Supra's verifier ran the pairing check on zero inputs, which trivially passes, and accepted a SAUCE price roughly 10¹² too high. Bonzo, which used Supra as its single source, valued the collateral accordingly, and the attacker borrowed about 6.6M USDC and 34.5M WHBAR. Bonzo paused lending about 50 minutes later. Sources: [Bonzo incident report](https://bonzo.finance/blog/bonzo-lend-incident-report-oracle-provider-exploit), [CryptoSlate analysis](https://cryptoslate.com/how-a-zeroed-oracle-signature-unlocked-9m-from-hedera-defi-lender-bonzo-lend/).
+On 11 July 2026 an attacker submitted a Supra price update with an all-zero signature. Supra's verifier accepted it, and Bonzo, which used Supra alone, valued about 250 SAUCE of collateral some 10¹² times too high. About $9M was borrowed out ([incident report](https://bonzo.finance/blog/bonzo-lend-incident-report-oracle-provider-exploit)).
 
-**The replay** (`packages/foundry/test/BonzoReplay.t.sol`) runs the **same `LendingMarket` code** against the same forged Supra update, changing only how the oracle is wired:
+`packages/foundry/test/BonzoReplay.t.sol` runs the same `LendingMarket` against a forged Supra price and changes only the oracle wiring:
 
-| Test | Oracle wiring | Result |
+| Test | Wiring | Result |
 | --- | --- | --- |
-| `test_singleFeedMarket_isDrainedByOneForgedPrice` | Supra only, quorum 1, no meaningful bounds (Bonzo's shape) | Attacker borrows the entire 100,000 USDC pool against ~$30 of HBAR |
-| `test_guardedMarket_ignoresForgedFeedAndKeepsPricingHonestly` | 3 sources, 2-of-3 guard | Supra is `OutOfBounds`, the price stays at the honest median, and the borrow reverts `Undercollateralized` |
-| `test_guardedMarket_rejectsPlausibleForgeryAsOutlier` | Same, but the forgery is only 10× (inside the bounds) | Supra is an `Outlier`; same result |
-| `test_guardedMarket_failsClosedWhenMajorityCompromised` | Two of three sources forged, to different values | No quorum, so the breaker trips and borrowing halts instead of paying out |
-
-`testFuzz_singleCompromisedSourceCannotMovePrice` in `OracleGuard.t.sol` generalizes the first property: for any forged value from any single source, the accepted price does not change.
+| `singleFeedMarket_isDrainedByOneForgedPrice` | Supra only | The attacker borrows the whole 100k USDC pool against ~$30 of HBAR |
+| `guardedMarket_ignoresForgedFeedAndKeepsPricingHonestly` | Guard, 2 of 3 | Supra is `OutOfBounds`, the borrow reverts `Undercollateralized` |
+| `guardedMarket_rejectsPlausibleForgeryAsOutlier` | Guard, forgery only 10× | Supra is an `Outlier`, same result |
+| `guardedMarket_failsClosedWhenMajorityCompromised` | Two sources forged | No quorum: the breaker trips and borrowing halts |
 
 ```bash
-cd packages/foundry
-forge test --match-contract BonzoReplay -vv
+cd packages/foundry && forge test --match-contract BonzoReplay -vv
 ```
 
-## What the guard does not do
+## Limits
 
-- **It does not fix the provider.** The zero-signature bug lived in Supra's verifier. The guard makes a single broken provider harmless; it does not make it correct.
-- **It cannot out-vote a colluding majority.** If two of three providers report the same forged price, the median is forged. The change limit still caps how far one check can move the price (20%), and a tripped breaker needs a full cooldown of agreement to reset.
-- **It is not a TWAP.** Every accepted price is a spot median. Markets for thinly traded collateral should add a time-weighted source.
+- The guard makes one broken provider harmless. It does not fix the provider.
+- If a majority of providers report the same forged price, the median is forged. The change limit still caps each step at 20%.
+- Prices are spot medians, not time-weighted. Thinly traded collateral should add a TWAP source.

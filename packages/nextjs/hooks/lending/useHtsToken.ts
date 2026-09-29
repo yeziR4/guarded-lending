@@ -2,35 +2,31 @@ import { Address } from "viem";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { htsTokenAbi } from "~~/contracts/externalContracts";
 import { useTransactor } from "~~/hooks/scaffold-hbar";
-
-const POLL = { refetchInterval: 10_000 } as const;
+import { POLL_MS } from "~~/utils/lending/format";
 
 /**
- * Balance, allowance and association state for an HTS fungible token held by the connected wallet.
- *
- * On Hedera an account must be associated with a token before it can receive it. HTS tokens expose
- * IHRC-719 `associate()` on their EVM facade so a MetaMask-style wallet can opt in with one call.
- * `isAssociated()` reads the caller's own status, so the read is sent `from` the connected account.
+ * Balance, allowance and association for an HTS token. Hedera accounts must `associate()` (IHRC-719)
+ * before receiving a token; `isAssociated()` reads the caller's status, so it is sent `from` the account.
  */
 export const useHtsToken = (token: Address | undefined, spender: Address | undefined) => {
   const { address: account } = useAccount();
   const enabled = Boolean(token && account);
   const writeTx = useTransactor();
-  const { writeContractAsync, isPending } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
 
   const balance = useReadContract({
     address: token,
     abi: htsTokenAbi,
     functionName: "balanceOf",
     args: account ? [account] : undefined,
-    query: { enabled, ...POLL },
+    query: { enabled, refetchInterval: POLL_MS },
   });
   const allowance = useReadContract({
     address: token,
     abi: htsTokenAbi,
     functionName: "allowance",
     args: account && spender ? [account, spender] : undefined,
-    query: { enabled: enabled && Boolean(spender), ...POLL },
+    query: { enabled: enabled && Boolean(spender), refetchInterval: POLL_MS },
   });
   const associated = useReadContract({
     address: token,
@@ -60,7 +56,6 @@ export const useHtsToken = (token: Address | undefined, spender: Address | undef
     isAssociated: associated.data,
     associate,
     ensureAllowance,
-    isPending,
     refetch: () => Promise.all([balance.refetch(), allowance.refetch()]),
   };
 };

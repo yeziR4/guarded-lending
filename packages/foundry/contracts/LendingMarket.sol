@@ -9,14 +9,9 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @title LendingMarket
-/// @notice Isolated market: lenders supply an HTS stablecoin (e.g. USDC), borrowers lock native HBAR as
-///         collateral and borrow the stablecoin. Every action that depends on the HBAR price refreshes
-///         and reads it through `OracleGuard`, so a manipulated or failing oracle blocks borrowing,
-///         collateral withdrawal and liquidation instead of mispricing them. Actions that only reduce
-///         risk (supplying, adding collateral, repaying) never need a price and stay open.
-///
-///         Lender deposits are represented by an HTS fungible token created by this contract, so the
-///         position is a native Hedera asset visible in any wallet and on HashScan.
+/// @notice Lenders supply an HTS stablecoin and receive an HTS receipt token; borrowers lock HBAR and
+///         borrow the stablecoin. Price-dependent actions go through `OracleGuard` and revert when it
+///         is tripped; supplying, adding collateral and repaying never need a price.
 contract LendingMarket is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
@@ -29,8 +24,7 @@ contract LendingMarket is ReentrancyGuard {
     uint256 private constant HBAR_DECIMALS = 8;
     /// @dev ~90 days, the minimum HTS auto-renew period.
     int64 private constant AUTO_RENEW_PERIOD = 7_776_000;
-    /// @notice HBAR (tinybars) held back at initialization to pay receipt-token renewals, so renewal
-    ///         fees are never taken from borrowers' collateral.
+    /// @notice Tinybars kept at initialization for receipt-token renewals, so they never touch collateral.
     uint256 public constant RENEWAL_RESERVE = 1e8;
 
     struct RiskParams {
@@ -91,8 +85,7 @@ contract LendingMarket is ReentrancyGuard {
     mapping(address borrower => Account) public accounts;
 
     /// @param asset HTS token lenders supply (e.g. USDC).
-    /// @param assetDecimals Decimals of `asset`. Passed in rather than queried so deployment never has
-    ///        to call an HTS token during Forge's local script simulation, where HTS is not available.
+    /// @param assetDecimals Passed in because HTS tokens cannot be queried during `forge script` simulation.
     constructor(address asset, uint8 assetDecimals, OracleGuard guard, RiskParams memory risk) {
         if (asset == address(0) || address(guard) == address(0)) revert InvalidParams();
         if (risk.ltvBps == 0 || risk.ltvBps >= risk.liquidationThresholdBps || risk.liquidationThresholdBps >= BPS) {
@@ -118,13 +111,9 @@ contract LendingMarket is ReentrancyGuard {
                               SETUP
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice One-time setup: associates the market with the asset token and creates the receipt
-    ///         token. `msg.value` pays the HTS token-creation fee; `RENEWAL_RESERVE` is kept to fund
-    ///         the token's auto-renewal and the rest is refunded. Anyone may call it; the token's
-    ///         parameters are fixed in code and its only key (supply) belongs to this contract.
-    /// @dev The market must be its own auto-renew account: naming the caller would require the caller's
-    ///      signature inside the precompile call, which HTS rejects with
-    ///      INVALID_FULL_PREFIX_SIGNATURE_FOR_PRECOMPILE (326).
+    /// @notice One-time setup: associates with the asset and creates the receipt token. `msg.value` pays
+    ///         the creation fee; `RENEWAL_RESERVE` is kept and the rest refunded.
+    /// @dev The market is its own auto-renew account: HTS rejects any account that has not signed (326).
     function initialize(string calldata name, string calldata symbol) external payable nonReentrant {
         if (shareToken != address(0)) revert AlreadyInitialized();
 
@@ -172,8 +161,7 @@ contract LendingMarket is ReentrancyGuard {
                               LENDERS
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Supplies `assets` and receives receipt shares. The caller must be associated with the
-    ///         share token (IHRC-719 `associate()` on the token, or auto-association).
+    /// @notice The caller must be associated with the share token (IHRC-719 `associate()`).
     function supply(uint256 assets) external nonReentrant returns (uint256 shares) {
         if (assets == 0) revert ZeroAmount();
         address share = _share();
@@ -189,8 +177,7 @@ contract LendingMarket is ReentrancyGuard {
         emit Supplied(msg.sender, assets, shares);
     }
 
-    /// @notice Redeems `shares` for the underlying asset. The caller must first approve this market to
-    ///         pull the shares, which are then burned.
+    /// @notice Burns `shares` (approve this market first) and returns the underlying asset.
     function withdraw(uint256 shares) external nonReentrant returns (uint256 assets) {
         if (shares == 0) revert ZeroAmount();
         address share = _share();
@@ -272,9 +259,7 @@ contract LendingMarket is ReentrancyGuard {
                             LIQUIDATION
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Repays part of an unhealthy position and seizes collateral worth the repayment plus
-    ///         the liquidation bonus. Blocked while the oracle breaker is tripped, so a manipulated
-    ///         price cannot be used to liquidate healthy borrowers.
+    /// @notice Repays part of an unhealthy position for collateral plus the bonus. Blocked while tripped.
     function liquidate(address borrower, uint256 repayAmount) external nonReentrant returns (uint256 seized) {
         if (repayAmount == 0) revert ZeroAmount();
         accrueInterest();
@@ -305,7 +290,6 @@ contract LendingMarket is ReentrancyGuard {
                               INTEREST
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Accrues interest since the last accrual. Called by every action and by the Guardian.
     function accrueInterest() public {
         uint256 elapsed = block.timestamp - lastAccrual;
         if (elapsed == 0) return;
@@ -342,11 +326,8 @@ contract LendingMarket is ReentrancyGuard {
         return _debt(accounts[borrower]);
     }
 
-    /// @notice Position summary at `price` (use `GUARD.lastPrice()` for display).
-    /// @return collateral HBAR collateral in tinybars.
-    /// @return debt Outstanding debt in asset units.
-    /// @return maxDebt Borrow limit at the LTV.
-    /// @return healthFactorWad Liquidation-threshold value / debt, WAD-scaled (max uint if no debt).
+    /// @notice For display, priced at `price` (e.g. `GUARD.lastPrice()`). Collateral in tinybars;
+    ///         health factor WAD-scaled, max uint without debt.
     function positionAt(address borrower, uint256 price)
         external
         view
@@ -364,8 +345,7 @@ contract LendingMarket is ReentrancyGuard {
                               INTERNAL
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev Refreshes the guard, then reads it. If the check fails the read reverts, so the whole
-    ///      action reverts with the breaker reason.
+    /// @dev Reverts with the breaker reason if the check fails.
     function _guardedPrice() private returns (uint256) {
         GUARD.poke();
         return GUARD.price();

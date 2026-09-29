@@ -3,8 +3,7 @@ pragma solidity ^0.8.28;
 
 import { IPriceSource } from "../../contracts/oracle/IPriceSource.sol";
 
-/// @notice Controllable price source. `compromise()` models a provider whose verification accepts a
-///         forged update, which is what happened to the Supra feed behind the Bonzo Lend exploit.
+/// @notice Price source whose price, timestamp and failure mode the test controls.
 contract MockPriceSource is IPriceSource {
     string private name;
     uint256 public priceE18;

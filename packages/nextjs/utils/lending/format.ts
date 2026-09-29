@@ -7,6 +7,10 @@ export const TINYBAR_DECIMALS = 8;
 export const WEIBAR_PER_TINYBAR = 10n ** 10n;
 const SECONDS_PER_YEAR = 31_536_000n;
 
+/** Poll contract reads instead of re-reading on every ~2 s Hedera block. */
+export const POLL_MS = 10_000;
+export const POLLED = { watch: false, query: { refetchInterval: POLL_MS } } as const;
+
 const number = (value: bigint, decimals: number, digits: number) =>
   Number(formatUnits(value, decimals)).toLocaleString(undefined, { maximumFractionDigits: digits });
 

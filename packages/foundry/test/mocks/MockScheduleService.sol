@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-/// @notice Stand-in for the HSS system contract at 0x16b. HSS only executes on a live Hedera network,
-///         so unit tests assert what was booked; `test:testnet` and a live deploy cover execution.
+/// @notice Records bookings in place of the HSS system contract at 0x16b.
 contract MockScheduleService {
     int64 public responseCode = 22;
     bool public hasCapacity = true;
-    /// @notice Models the live failure: booking needs more gas than the caller forwarded.
     bool public exhaustGas;
     uint256 public scheduled;
 

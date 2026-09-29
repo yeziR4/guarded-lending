@@ -7,22 +7,15 @@ import { IHederaScheduleService } from "./interfaces/IHederaScheduleService.sol"
 import { HederaResponseCodes } from "hedera-forking/HederaResponseCodes.sol";
 
 /// @title Guardian
-/// @notice Keeps the oracle check and interest accrual running without an off-chain keeper. Each
-///         `tick()` pokes the guard, accrues interest, and books the next tick with the Hedera Schedule
-///         Service (HIP-1215), so the chain of checks lives entirely on the network.
-/// @dev The schedule is created with a direct CALL to the HSS system contract. Scheduling from a
-///      DELEGATECALL frame is avoided on purpose (see hiero-consensus-node#27263).
-///      The contract pays for its own scheduled executions, so keep it funded with HBAR.
+/// @notice Keeperless timer: each `tick()` pokes the guard, accrues interest and books the next tick with
+///         the Hedera Schedule Service (HIP-1215). Pays for its own executions, so keep it funded.
 contract Guardian {
     IHederaScheduleService private constant HSS = IHederaScheduleService(address(0x16b));
     int64 private constant HSS_SUCCESS = int64(HederaResponseCodes.SUCCESS);
-    /// @dev Hedera's `block.timestamp` is the start of the ~2 s record block, so a schedule executing at
-    ///      its booked second can observe a slightly earlier time. Observed on testnet: booked for
-    ///      1790605316, executed at consensus 1790605316.07 inside a block that began a second earlier.
+    /// @dev `block.timestamp` is the start of Hedera's ~2 s record block, so it can lag the booked second.
     uint256 public constant BLOCK_TIME_TOLERANCE = 10;
     /// @dev Gas kept back from the HSS call so a failed booking can still be recorded.
     uint256 private constant BOOKKEEPING_GAS = 30_000;
-    /// @notice `ScheduleFailed` reasons that are not HSS response codes.
     int64 public constant NO_CAPACITY = -1;
     int64 public constant SCHEDULE_CALL_REVERTED = -2;
 
@@ -52,14 +45,13 @@ contract Guardian {
         GAS_LIMIT = gasLimit;
     }
 
-    /// @notice Starts (or restarts, after the chain was broken) the scheduled loop. `msg.value` funds it.
+    /// @notice Starts or restarts the loop. `msg.value` funds it.
     function start() external payable {
         if (nextRunAt != 0 && !_isDue()) revert AlreadyRunning(nextRunAt);
         _scheduleNext();
     }
 
-    /// @notice Runs one check. Anyone may call it; only the first call once the run is due books the
-    ///         following run, so extra calls never fork the schedule into parallel chains.
+    /// @notice Anyone may call it; only the first call once due books the next run.
     function tick() external {
         bool healthy = GUARD.poke();
         MARKET.accrueInterest();
@@ -72,8 +64,7 @@ contract Guardian {
         return block.timestamp + BLOCK_TIME_TOLERANCE >= nextRunAt;
     }
 
-    /// @dev Books the next tick. Any failure leaves the loop stopped (`nextRunAt == 0`) so `start()` can
-    ///      restart it, and never reverts: the tick's oracle check must persist even if booking fails.
+    /// @dev Never reverts, so a failed booking cannot undo the tick's oracle check.
     function _scheduleNext() private {
         uint256 runAt = block.timestamp + INTERVAL;
 
@@ -82,8 +73,7 @@ contract Guardian {
             return;
         }
 
-        // Booking a schedule costs ~1.4M gas on Hedera (the schedule fee is charged as gas), so a GAS_LIMIT
-        // that is too small makes this call run out of gas. Keep enough back to record the failure.
+        // Booking costs ~1.4M gas; keep some back to record a failure.
         try HSS.scheduleCall{ gas: gasleft() - BOOKKEEPING_GAS }(
             address(this), runAt, GAS_LIMIT, 0, abi.encodeCall(this.tick, ())
         ) returns (

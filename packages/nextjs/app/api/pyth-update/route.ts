@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 
-/**
- * Server-side proxy for Pyth Hermes price updates. Since the Pyth Core upgrade (2026-08-26) Hermes
- * requires an API key, which must never be shipped to the browser, so the dashboard asks this route
- * for signed update data and submits it on-chain itself.
- */
+/** Fetches signed Pyth updates server-side so the Hermes API key never reaches the browser. */
 const HERMES_URL = process.env.PYTH_HERMES_URL ?? "https://pyth.dourolabs.app/hermes";
 const PRICE_ID_RE = /^0x[0-9a-fA-F]{64}$/;
 

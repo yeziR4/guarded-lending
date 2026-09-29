@@ -8,15 +8,8 @@ import { IHRC719 } from "hedera-forking/IHRC719.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { MarketFixture } from "./utils/MarketFixture.sol";
 
-/// @notice Replays the shape of the July 2026 Bonzo Lend exploit against this market.
-///
-///         What happened: Supra's on-chain verifier accepted a price update carrying a zeroed
-///         signature. The attacker posted a few dollars of collateral, pushed a price roughly 10^12
-///         times too high, and borrowed out the pool. Bonzo's own contracts behaved as designed; they
-///         trusted a single feed.
-///
-///         Here the same `LendingMarket` code runs twice. The only difference is the oracle config:
-///         once wired to a single feed (Bonzo's setup), once through a 2-of-3 `OracleGuard`.
+/// @notice The July 2026 Bonzo Lend exploit (a forged Supra price ~10^12 too high) against the same market
+///         code, wired to a single feed and then through the guard. Background: docs/oracle-guard.md.
 contract BonzoReplayTest is MarketFixture {
     uint256 internal constant POOL = 100_000 * ONE_USDC;
     uint256 internal constant DUST_COLLATERAL = 250 * ONE_HBAR; // ~$30
@@ -77,8 +70,7 @@ contract BonzoReplayTest is MarketFixture {
         assertEq(uint256(readings[1].status), uint256(OracleGuard.Status.Outlier));
     }
 
-    /// If two of three providers are compromised the guard cannot tell which side is honest, so it
-    /// stops trusting all of them: borrowing halts instead of paying out at a forged price.
+    /// With two of three sources forged the guard cannot tell which side is honest, so it halts.
     function test_guardedMarket_failsClosedWhenMajorityCompromised() public {
         _supply(lender, POOL);
         supra.set(HBAR_PRICE * 10);

@@ -1,9 +1,6 @@
 import { hedera } from "viem/chains";
 
-/**
- * Hedera mirror node REST API. History (event logs, HCS topic messages) is read here rather than via
- * `eth_getLogs`, which public JSON-RPC relays restrict to narrow block ranges.
- */
+/** History comes from the mirror node: public JSON-RPC relays restrict `eth_getLogs` ranges. */
 export const mirrorNodeUrl = (chainId: number) =>
   chainId === hedera.id ? "https://mainnet.mirrornode.hedera.com" : "https://testnet.mirrornode.hedera.com";
 
@@ -12,11 +9,7 @@ export const hashscanUrl = (chainId: number, path: string) =>
 
 export type MirrorLog = { topics: `0x${string}`[]; data: `0x${string}`; timestamp: string; transaction_hash: string };
 
-/**
- * Logs emitted by `contract` with the given topic0, newest first. The mirror node only filters by topic
- * inside an explicit timestamp range, so this pages through the contract's logs (up to `maxPages` × 100)
- * and filters client-side. An indexer is the right tool once a market outgrows that.
- */
+/** Newest-first logs matching topic0. The mirror node only filters topics inside a time range, so filter here. */
 export const fetchContractLogs = async (chainId: number, contract: string, topic0: string, maxPages = 10) => {
   const base = mirrorNodeUrl(chainId);
   const matches: MirrorLog[] = [];

@@ -11,12 +11,8 @@ import { LendingMarket } from "../contracts/LendingMarket.sol";
 import { Guardian } from "../contracts/Guardian.sol";
 
 /**
- * @notice Deploys the three HBAR/USD price sources, the OracleGuard, the LendingMarket and the Guardian.
- * @dev Only plain EVM deployments happen here. The two calls that touch Hedera system contracts
- *      (`LendingMarket.initialize` -> HTS, `Guardian.start` -> HSS) run afterwards through
- *      `npm run foundry:setup`, because Forge's local script simulation has no HTS/HSS.
- *
- *      Every tunable below is overridable with an environment variable of the same name.
+ * @notice Deploys the sources, guard, market and Guardian. HTS/HSS calls run afterwards in `npm run setup`
+ *         (forge script simulation has no system contracts). Tunables are overridable by env var.
  */
 contract DeployScript is ScaffoldETHDeploy {
     struct Feeds {

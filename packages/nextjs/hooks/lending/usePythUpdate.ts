@@ -4,11 +4,7 @@ import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContr
 import { WEIBAR_PER_TINYBAR } from "~~/utils/lending/format";
 import { notification } from "~~/utils/scaffold-hbar";
 
-/**
- * Pyth is a pull oracle: its on-chain price only moves when someone submits a signed update fetched
- * from Hermes. This pushes the latest update for the guard's Pyth feed so the third source is fresh.
- * Update data comes from `/api/pyth-update`, which holds the Hermes API key server-side.
- */
+/** Pushes the latest signed Pyth update on-chain; update data comes from `/api/pyth-update`. */
 export const usePythUpdate = () => {
   const [isFetching, setIsFetching] = useState(false);
   const publicClient = usePublicClient();
@@ -35,7 +31,6 @@ export const usePythUpdate = () => {
         functionName: "getUpdateFee",
         args: [updateData],
       });
-      // The fee is quoted in tinybars (EVM-internal); transaction values are sent in weibars.
       await writeContractAsync({
         functionName: "updatePriceFeeds",
         args: [updateData],

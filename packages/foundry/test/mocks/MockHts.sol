@@ -7,8 +7,7 @@ import { IHederaTokenService } from "hedera-forking/IHederaTokenService.sol";
 address constant HTS_ADDRESS = address(0x167);
 int64 constant HTS_SUCCESS = 22;
 
-/// @notice Fungible token as the mock HTS creates it: ERC-20 facade plus the IHRC-719 association
-///         methods, with mint/burn only reachable through the HTS mock.
+/// @notice Token created by MockHts: ERC-20 plus IHRC-719, mint/burn only through the mock.
 contract MockHtsToken is ERC20 {
     uint8 private immutable DECIMALS;
     address public immutable TREASURY;
@@ -48,9 +47,8 @@ contract MockHtsToken is ERC20 {
     }
 }
 
-/// @notice Minimal stand-in for the HTS system contract, etched at 0x167 in unit tests. It covers the
-///         calls LendingMarket makes and enforces the supply key on mint/burn. Real HTS behaviour is
-///         exercised on testnet (see README "Testing").
+/// @notice The HTS calls LendingMarket makes, etched at 0x167. Enforces the supply key and HTS's
+///         auto-renew signature rule.
 contract MockHts {
     uint256 private constant SUPPLY_KEY_TYPE = 16;
     int64 private constant INVALID_FULL_PREFIX_SIGNATURE_FOR_PRECOMPILE = 326;
@@ -62,8 +60,7 @@ contract MockHts {
         payable
         returns (int64, address)
     {
-        // A contract can only authorize for itself: naming any other auto-renew account needs that
-        // account's signature, which a precompile call cannot carry. Mirrors live testnet behaviour.
+        // Only the calling contract itself can be named without a signature.
         if (token.expiry.autoRenewAccount != address(0) && token.expiry.autoRenewAccount != msg.sender) {
             return (INVALID_FULL_PREFIX_SIGNATURE_FOR_PRECOMPILE, address(0));
         }

@@ -7,9 +7,7 @@ import { IPyth } from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 
 /// @title PythSource
-/// @notice Reads a Pyth pull-oracle price. Pyth prices only move on-chain when someone submits a
-///         signed Hermes update to the Pyth contract, so this source goes stale unless the app pushes
-///         updates; the guard simply excludes it while stale.
+/// @notice Pyth pull-oracle price; stale (and excluded by the guard) until someone pushes an update.
 contract PythSource is IPriceSource {
     uint256 private constant BPS = 10_000;
 
@@ -27,7 +25,6 @@ contract PythSource is IPriceSource {
     }
 
     function latest() external view returns (uint256 priceE18, uint256 updatedAt) {
-        // Freshness is enforced uniformly by the guard, so read without Pyth's own age check.
         PythStructs.Price memory p = PYTH.getPriceUnsafe(PRICE_ID);
         if (p.price <= 0) revert SourceInvalidAnswer();
         if (p.publishTime == 0) revert SourceIncompleteRound();

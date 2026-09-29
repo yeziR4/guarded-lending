@@ -4,21 +4,9 @@ pragma solidity ^0.8.28;
 import { IPriceSource } from "./IPriceSource.sol";
 
 /// @title OracleGuard
-/// @notice Turns several independent oracle providers into one price that a lending market can trust.
-///
-///         Every `poke()` reads all sources and applies, in order:
-///           1. provider sanity  - a source that reverts (zero/negative answer, incomplete round,
-///                                 wide confidence) is dropped;
-///           2. freshness        - a source older than its own max age is dropped;
-///           3. absolute bounds  - a price outside [minPrice, maxPrice] is dropped;
-///           4. consensus        - the median of the survivors is taken, and at least `quorum`
-///                                 sources must sit within `maxDeviationBps` of it;
-///           5. rate of change   - the median may not move more than `maxChangeBps` from the last
-///                                 accepted price in a single step.
-///
-///         Failing (4) or (5) trips a circuit breaker. While tripped, `price()` reverts, so every
-///         consumer fails closed. The breaker resets itself once the sources have been healthy for a
-///         full `cooldown`; there is no admin key that can force a price or skip the checks.
+/// @notice Median of independent price sources, accepted only when a quorum agrees and the move is within
+///         limits; otherwise a breaker trips and `price()` reverts until the sources have been healthy
+///         for a full cooldown. No admin key. Rules: docs/oracle-guard.md.
 contract OracleGuard {
     uint256 private constant BPS = 10_000;
     uint256 public constant MAX_SOURCES = 5;
@@ -125,10 +113,7 @@ contract OracleGuard {
         return (sources[index], maxAges[index]);
     }
 
-    /// @notice Reads every source and classifies it without changing state.
-    /// @return readings One entry per source, in source order.
-    /// @return median Median of the sources that passed sanity, freshness and bounds (0 if none).
-    /// @return agreeing Number of those sources within `MAX_DEVIATION_BPS` of the median.
+    /// @notice Classifies every source without changing state. `median` is 0 if no source is usable.
     function inspect() public view returns (Reading[] memory readings, uint256 median, uint256 agreeing) {
         uint256 n = sources.length;
         readings = new Reading[](n);
@@ -152,9 +137,7 @@ contract OracleGuard {
         }
     }
 
-    /// @notice Runs the full check and records the outcome. Permissionless: the market calls it before
-    ///         every price-dependent action, and the scheduled `Guardian` calls it on a timer.
-    /// @return healthy True if a fresh price was accepted.
+    /// @notice Runs the check and records the outcome. Permissionless and never reverts.
     function poke() external returns (bool healthy) {
         (Reading[] memory readings, uint256 median, uint256 agreeing) = inspect();
         emit Checked(median, agreeing, readings);
