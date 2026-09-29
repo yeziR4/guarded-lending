@@ -123,7 +123,7 @@ flowchart LR
    npm run relay -- --keystore hedera-testnet
    ```
 
-   The first run creates the topic and prints its id. Put it in `packages/nextjs/.env.local` as `NEXT_PUBLIC_AUDIT_TOPIC_ID`, and pass `--topic <id>` on later runs.
+   The first run creates the topic and prints its id. Put it in `packages/nextjs/.env.local` as `NEXT_PUBLIC_AUDIT_TOPIC_ID`, and pass `--topic <id>` on later runs. Until you do, the dashboard shows the shared testnet deployment's topic.
 
 ### Costs on testnet
 
@@ -189,6 +189,7 @@ Unit tests replace HTS (`0x167`) and HSS (`0x16b`) with small mocks (`test/mocks
 | OracleGuard | [`0x35987868E2677B7F778888B32c4db30Ad812BbE3`](https://hashscan.io/testnet/contract/0x35987868E2677B7F778888B32c4db30Ad812BbE3) |
 | LendingMarket | [`0x3cd26C4d74Ec3e96b190195Df2084C63901d03b5`](https://hashscan.io/testnet/contract/0x3cd26C4d74Ec3e96b190195Df2084C63901d03b5) |
 | gUSDC (HTS) | [`0.0.10760610`](https://hashscan.io/testnet/token/0.0.10760610) |
+| HCS audit topic | [`0.0.10772847`](https://hashscan.io/testnet/topic/0.0.10772847) |
 | Guardian | [`0xda970AfF580EF5D0D917b94aa552921B8166B8B1`](https://hashscan.io/testnet/contract/0xda970AfF580EF5D0D917b94aa552921B8166B8B1) |
 
 Proof-of-transaction (the market's first live oracle check):

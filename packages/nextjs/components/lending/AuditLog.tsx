@@ -4,7 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useTargetNetwork } from "~~/hooks/scaffold-hbar";
 import { fetchTopicMessages, hashscanUrl } from "~~/utils/lending/mirrorNode";
 
-const TOPIC_ID = process.env.NEXT_PUBLIC_AUDIT_TOPIC_ID;
+/**
+ * Audit topic for the shared deployment in deployedContracts.ts, so a fresh scaffold shows a live log.
+ * Set NEXT_PUBLIC_AUDIT_TOPIC_ID to the topic your own relayer created.
+ */
+const SHARED_AUDIT_TOPICS: Record<number, string> = { 296: "0.0.10772847" };
 
 /** Shape of the messages the relayer (`packages/foundry/scripts-js/hcsRelay.js`) publishes. */
 type AuditEntry = {
@@ -33,11 +37,12 @@ const EVENT_BADGE = { Checked: "badge-ghost", Tripped: "badge-error", Reset: "ba
  */
 export const AuditLog = () => {
   const { targetNetwork } = useTargetNetwork();
+  const topicId = process.env.NEXT_PUBLIC_AUDIT_TOPIC_ID || SHARED_AUDIT_TOPICS[targetNetwork.id];
   const { data, isLoading, error } = useQuery({
-    queryKey: ["audit", targetNetwork.id, TOPIC_ID],
-    enabled: Boolean(TOPIC_ID),
+    queryKey: ["audit", targetNetwork.id, topicId],
+    enabled: Boolean(topicId),
     refetchInterval: 15_000,
-    queryFn: () => fetchTopicMessages(targetNetwork.id, TOPIC_ID as string),
+    queryFn: () => fetchTopicMessages(targetNetwork.id, topicId as string),
   });
 
   return (
@@ -45,19 +50,19 @@ export const AuditLog = () => {
       <div className="card-body gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="card-title">Oracle audit log (HCS)</h2>
-          {TOPIC_ID && (
+          {topicId && (
             <a
               className="link text-sm"
-              href={hashscanUrl(targetNetwork.id, `topic/${TOPIC_ID}`)}
+              href={hashscanUrl(targetNetwork.id, `topic/${topicId}`)}
               target="_blank"
               rel="noreferrer"
             >
-              Topic {TOPIC_ID}
+              Topic {topicId}
             </a>
           )}
         </div>
 
-        {!TOPIC_ID && (
+        {!topicId && (
           <p className="text-sm m-0">
             Run <code className="bg-base-200 px-1 rounded">npm run foundry:relay</code> to create a topic and start
             mirroring guard events, then set{" "}
