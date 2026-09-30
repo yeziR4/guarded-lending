@@ -1,6 +1,7 @@
 import { formatUnits } from "viem";
 
-export const USDC_DECIMALS = 6;
+/** The market lends a 6-decimal HTS stablecoin (USDC, or tUSD on the testnet demo). */
+export const ASSET_DECIMALS = 6;
 /** Contract storage and `msg.value` inside the Hedera EVM are in tinybars. */
 export const TINYBAR_DECIMALS = 8;
 /** JSON-RPC transaction values are in weibars (18 decimals): 1 tinybar = 10^10 weibar. */
@@ -15,7 +16,7 @@ const number = (value: bigint, decimals: number, digits: number) =>
   Number(formatUnits(value, decimals)).toLocaleString(undefined, { maximumFractionDigits: digits });
 
 export const formatPrice = (priceE18: bigint) => `$${Number(formatUnits(priceE18, 18)).toFixed(4)}`;
-export const formatUsdc = (units: bigint) => number(units, USDC_DECIMALS, 2);
+export const formatAsset = (units: bigint) => number(units, ASSET_DECIMALS, 2);
 export const formatHbar = (tinybars: bigint) => number(tinybars, TINYBAR_DECIMALS, 2);
 export const formatBps = (bps: bigint) => `${Number(bps) / 100}%`;
 export const formatWadPercent = (wad: bigint) => `${(Number(formatUnits(wad, 18)) * 100).toFixed(2)}%`;

@@ -7,7 +7,7 @@ import { HederaAddress } from "~~/components/scaffold-hbar";
 import { useHtsToken } from "~~/hooks/lending/useHtsToken";
 import { useMarket } from "~~/hooks/lending/useMarket";
 import { useScaffoldReadContract, useScaffoldWriteContract, useTargetNetwork } from "~~/hooks/scaffold-hbar";
-import { POLL_MS, USDC_DECIMALS, formatHealthFactor, formatUsdc } from "~~/utils/lending/format";
+import { ASSET_DECIMALS, POLL_MS, formatAsset, formatHealthFactor } from "~~/utils/lending/format";
 import { fetchContractLogs } from "~~/utils/lending/mirrorNode";
 
 const BORROWED_TOPIC = toEventSelector("Borrowed(address,uint256)");
@@ -16,7 +16,7 @@ const WAD = 10n ** 18n;
 export const LiquidationsCard = () => {
   const { targetNetwork } = useTargetNetwork();
   const market = useMarket();
-  const usdc = useHtsToken(market.usdcAddress, market.marketAddress);
+  const asset = useHtsToken(market.assetAddress, market.marketAddress);
   const { writeContractAsync } = useScaffoldWriteContract({ contractName: "LendingMarket" });
   const { data: closeFactorBps = 0n } = useScaffoldReadContract({
     contractName: "LendingMarket",
@@ -36,7 +36,7 @@ export const LiquidationsCard = () => {
   });
 
   const liquidate = async (borrower: Address, amount: bigint) => {
-    await usdc.ensureAllowance(amount);
+    await asset.ensureAllowance(amount);
     await writeContractAsync({ functionName: "liquidate", args: [borrower, amount] });
   };
 
@@ -55,6 +55,7 @@ export const LiquidationsCard = () => {
             key={borrower}
             borrower={borrower}
             price={market.price}
+            symbol={market.assetSymbol}
             closeFactorBps={closeFactorBps}
             onLiquidate={amount => liquidate(borrower, amount)}
           />
@@ -67,11 +68,12 @@ export const LiquidationsCard = () => {
 type BorrowerRowProps = {
   borrower: Address;
   price: bigint | undefined;
+  symbol: string;
   closeFactorBps: bigint;
   onLiquidate: (amount: bigint) => Promise<void>;
 };
 
-const BorrowerRow = ({ borrower, price, closeFactorBps, onLiquidate }: BorrowerRowProps) => {
+const BorrowerRow = ({ borrower, price, symbol, closeFactorBps, onLiquidate }: BorrowerRowProps) => {
   const { targetNetwork } = useTargetNetwork();
   const { data: position } = useScaffoldReadContract({
     contractName: "LendingMarket",
@@ -89,14 +91,16 @@ const BorrowerRow = ({ borrower, price, closeFactorBps, onLiquidate }: BorrowerR
     <div className="rounded-box border border-base-300 p-3 flex flex-col gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <HederaAddress address={borrower} chain={targetNetwork} />
-        <span>Debt {formatUsdc(debt)} USDC</span>
+        <span>
+          Debt {formatAsset(debt)} {symbol}
+        </span>
         <span className={liquidatable ? "text-error font-semibold" : ""}>HF {formatHealthFactor(healthFactor)}</span>
       </div>
       {liquidatable && (
         <AmountForm
           action="Liquidate"
-          unit="USDC"
-          decimals={USDC_DECIMALS}
+          unit={symbol}
+          decimals={ASSET_DECIMALS}
           max={(debt * closeFactorBps) / 10_000n}
           onSubmit={onLiquidate}
         />

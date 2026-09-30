@@ -6,23 +6,23 @@ import { useHtsToken } from "~~/hooks/lending/useHtsToken";
 import { useMarket } from "~~/hooks/lending/useMarket";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-hbar";
 import {
+  ASSET_DECIMALS,
   TINYBAR_DECIMALS,
-  USDC_DECIMALS,
   WEIBAR_PER_TINYBAR,
+  formatAsset,
   formatHbar,
   formatHealthFactor,
-  formatUsdc,
 } from "~~/utils/lending/format";
 
 export const BorrowerCard = () => {
   const { address } = useAccount();
   const market = useMarket();
-  const usdc = useHtsToken(market.usdcAddress, market.marketAddress);
+  const asset = useHtsToken(market.assetAddress, market.marketAddress);
   const { data: hbar } = useBalance({ address });
   const { writeContractAsync } = useScaffoldWriteContract({ contractName: "LendingMarket" });
   const { collateral, debt, maxDebt, healthFactor } = market.position;
 
-  const refresh = () => Promise.all([usdc.refetch(), market.refetch()]);
+  const refresh = () => Promise.all([asset.refetch(), market.refetch()]);
   // Wallet balances come back in weibars (18 decimals); the market works in tinybars.
   const walletTinybars = hbar ? hbar.value / WEIBAR_PER_TINYBAR : 0n;
   const headroom = maxDebt > debt ? maxDebt - debt : 0n;
@@ -42,7 +42,7 @@ export const BorrowerCard = () => {
   };
   const repay = async (amount: bigint) => {
     if (!address) return;
-    await usdc.ensureAllowance(amount);
+    await asset.ensureAllowance(amount);
     await writeContractAsync({ functionName: "repay", args: [address, amount] });
     await refresh();
   };
@@ -57,10 +57,16 @@ export const BorrowerCard = () => {
             Collateral: <span className="font-semibold">{formatHbar(collateral)} HBAR</span>
           </div>
           <div>
-            Debt: <span className="font-semibold">{formatUsdc(debt)} USDC</span>
+            Debt:{" "}
+            <span className="font-semibold">
+              {formatAsset(debt)} {market.assetSymbol}
+            </span>
           </div>
           <div>
-            Borrow limit: <span className="font-semibold">{formatUsdc(maxDebt)} USDC</span>
+            Borrow limit:{" "}
+            <span className="font-semibold">
+              {formatAsset(maxDebt)} {market.assetSymbol}
+            </span>
           </div>
           <div>
             Health factor: <span className={`font-semibold ${healthClass}`}>{formatHealthFactor(healthFactor)}</span>
@@ -84,18 +90,24 @@ export const BorrowerCard = () => {
         />
 
         <div className="divider my-0 text-xs">Loan</div>
-        {usdc.isAssociated === false ? (
-          <button className="btn btn-sm btn-outline" onClick={usdc.associate}>
-            Associate USDC to receive loans
+        {asset.isAssociated === false ? (
+          <button className="btn btn-sm btn-outline" onClick={asset.associate}>
+            Associate {market.assetSymbol} to receive loans
           </button>
         ) : (
           <>
-            <AmountForm action="Borrow" unit="USDC" decimals={USDC_DECIMALS} max={headroom} onSubmit={borrow} />
+            <AmountForm
+              action="Borrow"
+              unit={market.assetSymbol}
+              decimals={ASSET_DECIMALS}
+              max={headroom}
+              onSubmit={borrow}
+            />
             <AmountForm
               action="Repay"
-              unit="USDC"
-              decimals={USDC_DECIMALS}
-              max={debt < usdc.balance ? debt : usdc.balance}
+              unit={market.assetSymbol}
+              decimals={ASSET_DECIMALS}
+              max={debt < asset.balance ? debt : asset.balance}
               onSubmit={repay}
             />
           </>

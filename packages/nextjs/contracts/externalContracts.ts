@@ -46,13 +46,9 @@ const PYTH = "0xA2aa501b19aff244D90cc15a4Cf739D2725B5729";
 
 const externalContracts = {
   296: {
-    // Circle USDC on Hedera testnet (0.0.429274). Test USDC: https://faucet.circle.com
-    USDC: { address: "0x0000000000000000000000000000000000068cda", abi: htsTokenAbi },
     Pyth: { address: PYTH, abi: pythAbi },
   },
   295: {
-    // Circle USDC on Hedera mainnet (0.0.456858)
-    USDC: { address: "0x000000000000000000000000000000000006f89a", abi: htsTokenAbi },
     Pyth: { address: PYTH, abi: pythAbi },
   },
 } as const;

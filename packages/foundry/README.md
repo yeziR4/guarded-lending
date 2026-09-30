@@ -10,13 +10,14 @@ Contracts, tests, deploy scripts and Node helpers for the guarded lending market
 | `oracle/sources/ChainlinkSource.sol` | Chainlink push feed (`latestRoundData`) |
 | `oracle/sources/SupraSource.sol` | Supra push oracle (`getSvalue`, millisecond timestamps) |
 | `oracle/sources/PythSource.sol` | Pyth pull oracle (`getPriceUnsafe`, confidence check) |
-| `LendingMarket.sol` | USDC lending against HBAR; gUSDC receipt token via HTS |
+| `LendingMarket.sol` | Stablecoin lending against HBAR; receipt token via HTS |
+| `TestStablecoin.sol` | Testnet-only tUSD with a rate-limited faucet |
 | `Guardian.sol` | Keeperless timer via HIP-1215 scheduled calls |
 
 ## Tests
 
 ```bash
-forge test                                                   # offline: 46 unit/fuzz tests, HTS + HSS mocked
+forge test                                                   # offline: 49 unit/fuzz tests, HTS + HSS mocked
 forge test --match-contract BonzoReplay -vv                  # the exploit replay
 forge test --match-path "test/fork/*" \
   --fork-url https://testnet.hashio.io/api --chain-id 296 -vv  # real guard vs live testnet feeds

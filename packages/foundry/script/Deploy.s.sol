@@ -81,7 +81,7 @@ contract DeployScript is ScaffoldETHDeploy {
         );
 
         LendingMarket market = new LendingMarket(
-            feeds.usdc,
+            vm.envOr("LENDING_ASSET", feeds.usdc), // 6-decimal HTS stablecoin
             6,
             guard,
             LendingMarket.RiskParams({

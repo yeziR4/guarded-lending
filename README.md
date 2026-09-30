@@ -31,7 +31,7 @@ cd <your-app>
 npm run next:dev
 ```
 
-Open http://localhost:3000. Chainlink and Supra show **Ok**, Pyth shows **Stale** (see [Pyth](#pyth)), and the guard shows "2 of 3 agree". To use the market, connect a testnet wallet and get HBAR from the [portal faucet](https://portal.hedera.com/faucet) and USDC from the [Circle faucet](https://faucet.circle.com). The UI asks you to **associate** each token first, which Hedera requires before an account can hold it.
+Open http://localhost:3000. Chainlink and Supra show **Ok**, Pyth shows **Stale** (see [Pyth](#pyth)), and the guard shows "2 of 3 agree". To use the market, connect a testnet wallet and get HBAR from the [portal faucet](https://portal.hedera.com/faucet), then press **Get 1,000 tUSD** in the Lend card. The UI asks you to **associate** each token first, which Hedera requires before an account can hold it.
 
 **Prerequisites:**
 - Node ≥ 20.18.3
@@ -55,7 +55,7 @@ npm run relay -- --keystore <name>                             # optional: HCS a
 
 **Costs (testnet):**
 - Deploy: about 5 HBAR.
-- Token creation: about $1; send 15 and the rest is refunded.
+- Token creation: send 30 HBAR; the unused part is refunded.
 - Guardian: about 1.7 HBAR per tick, every 6 h by default.
 
 The Guardian has no owner, so its funding can't be withdrawn. Fund it for as long as you want it to run.
@@ -83,7 +83,7 @@ Pyth only updates on-chain when someone pushes a signed update, and since August
 ## Test
 
 ```bash
-npm run foundry:test            # 46 offline tests, including the Bonzo replay; HTS and HSS are mocked
+npm run foundry:test            # 49 offline tests, including the Bonzo replay; HTS and HSS are mocked
 npm run foundry:test:testnet    # the real guard against live testnet feeds
 bash scripts/check-gate.sh --local   # fresh scaffold, lint, test, build, boot
 ```
@@ -95,14 +95,17 @@ bash scripts/check-gate.sh --local   # fresh scaffold, lint, test, build, boot
 
 ## Testnet deployment
 
+The shared deployment lends **tUSD**, a test stablecoin with a built-in faucet (`TestStablecoin.sol`), so anyone can try the full flow. Deploy your own against Circle USDC by leaving `LENDING_ASSET` unset.
+
 | | |
 | --- | --- |
-| OracleGuard | [`0x3598…BbE3`](https://hashscan.io/testnet/contract/0x35987868E2677B7F778888B32c4db30Ad812BbE3) |
-| LendingMarket | [`0x3cd2…03b5`](https://hashscan.io/testnet/contract/0x3cd26C4d74Ec3e96b190195Df2084C63901d03b5) |
-| Guardian | [`0xda97…8B1`](https://hashscan.io/testnet/contract/0xda970AfF580EF5D0D917b94aa552921B8166B8B1) |
-| gUSDC | [`0.0.10760610`](https://hashscan.io/testnet/token/0.0.10760610) |
+| OracleGuard | [`0x53C5…FF63`](https://hashscan.io/testnet/contract/0x53C5421e3C82a83Ba35f1962acc79b003f2dFF63) |
+| LendingMarket | [`0x6E22…1CC5`](https://hashscan.io/testnet/contract/0x6E22BcdCD4EF19F451564E905D10Ef9eD0391CC5) |
+| Guardian | [`0x294D…6b41`](https://hashscan.io/testnet/contract/0x294Dd6EE7D5fab9BA4960091618392cfD74A6b41) |
+| tUSD faucet | [`0x5007…8074`](https://hashscan.io/testnet/contract/0x5007b82a0E3ea33933822705D609153B10618074) |
+| tUSD / gtUSD | [`0.0.10792808`](https://hashscan.io/testnet/token/0.0.10792808) / [`0.0.10793053`](https://hashscan.io/testnet/token/0.0.10793053) |
 | Audit topic | [`0.0.10772847`](https://hashscan.io/testnet/topic/0.0.10772847) |
-| First oracle check | [`0x3d6d…d19a`](https://hashscan.io/testnet/tx/0x3d6df3cfde1e2f726d939996dfb3774d1499d9dad50db37bf7e1deaaab61d19a) |
+| First oracle check | [`0xefde…f03d`](https://hashscan.io/testnet/tx/0xefdea630a43e50726d8151e9e1e010d922d3cdda13f3567978928e128455f03d) |
 
 Hedera behaviour that differs from other EVM chains, and how this template handles it: [docs/hedera-notes.md](docs/hedera-notes.md). Not audited.
 

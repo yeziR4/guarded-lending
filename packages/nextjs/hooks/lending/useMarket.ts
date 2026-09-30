@@ -1,14 +1,21 @@
-import type { Address } from "viem";
-import { useAccount } from "wagmi";
+import { type Address, erc20Abi } from "viem";
+import { useAccount, useReadContract } from "wagmi";
 import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-hbar";
 import { POLLED, POLL_MS } from "~~/utils/lending/format";
+
+const useSymbol = (token: Address | undefined) =>
+  useReadContract({ address: token, abi: erc20Abi, functionName: "symbol" }).data ?? "…";
 
 /** Market-wide figures plus the connected wallet's position, priced at the guard's last accepted price. */
 export const useMarket = () => {
   const { address } = useAccount();
   const { data: market } = useDeployedContractInfo({ contractName: "LendingMarket" });
-  const { data: usdc } = useDeployedContractInfo({ contractName: "USDC" });
 
+  const { data: asset } = useScaffoldReadContract({
+    contractName: "LendingMarket",
+    functionName: "ASSET",
+    watch: false,
+  });
   const shareToken = useScaffoldReadContract({
     contractName: "LendingMarket",
     functionName: "shareToken",
@@ -48,12 +55,18 @@ export const useMarket = () => {
     query: { enabled: Boolean(address && lastPrice.data), refetchInterval: POLL_MS },
   });
 
+  const assetAddress = asset as Address | undefined;
+  const shareAddress = shareToken.data as Address | undefined;
+  const assetSymbol = useSymbol(assetAddress);
+  const shareSymbol = useSymbol(shareAddress);
   const [collateral, debt, maxDebt, healthFactor] = position.data ?? [0n, 0n, 0n, 0n];
 
   return {
     marketAddress: market?.address,
-    usdcAddress: usdc?.address,
-    shareToken: shareToken.data as Address | undefined,
+    assetAddress,
+    assetSymbol,
+    shareSymbol,
+    shareToken: shareAddress,
     totalAssets: totalAssets.data ?? 0n,
     totalBorrows: totalBorrows.data ?? 0n,
     totalCollateral: totalCollateral.data ?? 0n,

@@ -16,8 +16,8 @@ const Home: NextPage = () => {
         <div className="max-w-3xl mx-auto text-center text-white">
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Guarded Lending</h1>
           <p className="text-white/85 m-0">
-            An isolated USDC market with HBAR collateral that prices through three independent oracles and stops instead
-            of trusting a forged price. The failure mode behind the July 2026 Bonzo Lend exploit, handled.
+            A stablecoin lending market with HBAR collateral that prices through three independent oracles and stops
+            instead of trusting a forged price. The failure mode behind the July 2026 Bonzo Lend exploit, handled.
           </p>
         </div>
       </div>

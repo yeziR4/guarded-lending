@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-hbar/contract";
 const deployedContracts = {
   296: {
     ChainlinkSource: {
-      address: "0x59e0d81d920ed242f8a1dd098cc417f6011597c8",
+      address: "0x6e37a5a232f358549544f4e63e8e37bbeb5053b6",
       abi: [
         {
           type: "constructor",
@@ -87,10 +87,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41095565,
+      deployedOnBlock: 41179939,
     },
     SupraSource: {
-      address: "0xdbe89ae3c830bc860353f4ae139fdca1857bbe5d",
+      address: "0x688840b5c20f2bb9f7c104bfe6bdefb46846b1e5",
       abi: [
         {
           type: "constructor",
@@ -188,10 +188,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41095568,
+      deployedOnBlock: 41179941,
     },
     PythSource: {
-      address: "0xf3c3258f97594844637897127efc9637e91ea177",
+      address: "0xafee4da9b552155d6aed7ef61416b6dac4f45ca1",
       abi: [
         {
           type: "constructor",
@@ -318,10 +318,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41095571,
+      deployedOnBlock: 41179943,
     },
     OracleGuard: {
-      address: "0x35987868e2677b7f778888b32c4db30ad812bbe3",
+      address: "0x53c5421e3c82a83ba35f1962acc79b003f2dff63",
       abi: [
         {
           type: "constructor",
@@ -774,10 +774,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41095574,
+      deployedOnBlock: 41179946,
     },
     LendingMarket: {
-      address: "0x3cd26c4d74ec3e96b190195df2084c63901d03b5",
+      address: "0x6e22bcdcd4ef19f451564e905d10ef9ed0391cc5",
       abi: [
         {
           type: "constructor",
@@ -1605,10 +1605,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41095577,
+      deployedOnBlock: 41179948,
     },
     Guardian: {
-      address: "0xda970aff580ef5d0d917b94aa552921b8166b8b1",
+      address: "0x294dd6ee7d5fab9ba4960091618392cfd74a6b41",
       abi: [
         {
           type: "constructor",
@@ -1853,7 +1853,161 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41100146,
+      deployedOnBlock: 41179950,
+    },
+    TestStablecoin: {
+      address: "0x5007b82a0e3ea33933822705d609153b10618074",
+      abi: [
+        {
+          type: "function",
+          name: "CLAIM_AMOUNT",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "CLAIM_COOLDOWN",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "RENEWAL_RESERVE",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "claim",
+          inputs: [],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "initialize",
+          inputs: [],
+          outputs: [],
+          stateMutability: "payable",
+        },
+        {
+          type: "function",
+          name: "lastClaim",
+          inputs: [
+            {
+              name: "account",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "token",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "event",
+          name: "Claimed",
+          inputs: [
+            {
+              name: "to",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "AlreadyInitialized",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "ClaimTooSoon",
+          inputs: [
+            {
+              name: "availableAt",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "HtsCallFailed",
+          inputs: [
+            {
+              name: "responseCode",
+              type: "int64",
+              internalType: "int64",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "NotInitialized",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "SafeERC20FailedOperation",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 41178230,
     },
   },
 } as const;

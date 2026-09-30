@@ -134,11 +134,16 @@ function call(to, signature) {
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 if (call(byName.LendingMarket, "shareToken()(address)") === ZERO_ADDRESS) {
+  // The receipt token is named after the lent asset, e.g. USDC -> "Guarded USDC" / gUSDC.
+  const symbol = call(
+    call(byName.LendingMarket, "ASSET()(address)"),
+    "symbol()(string)",
+  ).replaceAll('"', "");
   send(
     `Initialize market (HTS fee from ${htsFeeHbar} HBAR; 1 HBAR renewal reserve kept, rest refunded)`,
     byName.LendingMarket,
     "initialize(string,string)",
-    ["Guarded USDC", "gUSDC"],
+    [`Guarded ${symbol}`, `g${symbol}`],
     htsFeeHbar,
   );
 } else {
