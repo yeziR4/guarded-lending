@@ -30,7 +30,7 @@ When a contract creates a token, every account it names (auto-renew, treasury, k
 
 ## History comes from the mirror node
 
-Public relays limit `eth_getLogs` ranges, so the dashboard reads logs and HCS messages from the mirror node REST API. The mirror node only filters logs by topic inside a timestamp range, so `fetchContractLogs` pages through a contract's logs and filters client-side.
+Public relays limit `eth_getLogs` ranges, so the dashboard reads event logs from the mirror node REST API. The mirror node only filters logs by topic inside a timestamp range, so `fetchContractLogs` pages through a contract's logs and filters client-side.
 
 ## Pyth needs an API key
 

@@ -1,6 +1,6 @@
 {
   "name": "guarded-lending",
-  "description": "Oracle-guarded lending market on Hedera: HBAR collateral, USDC loans, Chainlink + Supra + Pyth consensus with a circuit breaker, an HTS receipt token, a keeperless HIP-1215 Guardian and an HCS audit log.",
+  "description": "Oracle-guarded lending market on Hedera: HBAR collateral, stablecoin loans, Chainlink + Supra + Pyth consensus with a circuit breaker, an HTS receipt token, and a keeperless HIP-1215 Guardian.",
   "version": "1.0.0",
   "create-scaffold-hbar": {
     "capabilities": {

@@ -24,13 +24,3 @@ export const fetchContractLogs = async (chainId: number, contract: string, topic
   }
   return matches;
 };
-
-export type TopicMessage = { sequence_number: number; consensus_timestamp: string; message: string };
-
-export const fetchTopicMessages = async (chainId: number, topicId: string, limit = 25) => {
-  const url = `${mirrorNodeUrl(chainId)}/api/v1/topics/${topicId}/messages?order=desc&limit=${limit}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Mirror node ${response.status} for ${url}`);
-  const body: { messages: TopicMessage[] } = await response.json();
-  return body.messages.map(m => ({ ...m, message: atob(m.message) }));
-};

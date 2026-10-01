@@ -22,7 +22,6 @@
     "foundry:test:mainnet": "npm run test:mainnet -w @sh/foundry --",
     "foundry:deploy": "npm run deploy -w @sh/foundry --",
     "foundry:setup": "npm run setup -w @sh/foundry --",
-    "foundry:relay": "npm run relay -w @sh/foundry --",
     "foundry:flatten": "npm run flatten -w @sh/foundry --",
     "foundry:fork": "npm run fork -w @sh/foundry --",
     "foundry:format": "npm run format -w @sh/foundry --",

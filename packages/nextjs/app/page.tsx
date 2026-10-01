@@ -1,7 +1,6 @@
 "use client";
 
 import type { NextPage } from "next";
-import { AuditLog } from "~~/components/lending/AuditLog";
 import { BorrowerCard } from "~~/components/lending/BorrowerCard";
 import { GuardianCard } from "~~/components/lending/GuardianCard";
 import { LenderCard } from "~~/components/lending/LenderCard";
@@ -27,15 +26,14 @@ const Home: NextPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3 flex flex-col gap-6">
             <OraclePanel />
-            <AuditLog />
+            <GuardianCard />
+            <LiquidationsCard />
           </div>
           <div className="lg:col-span-2 flex flex-col gap-6">
             <LenderCard />
             <BorrowerCard />
-            <GuardianCard />
           </div>
         </div>
-        <LiquidationsCard />
       </div>
     </div>
   );

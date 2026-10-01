@@ -32,10 +32,9 @@ forge test --match-path "test/fork/*" \
 | `script/Deploy.s.sol` | Deploys sources, guard, market, Guardian. Parameters via env vars (see root README) |
 | `script/DeployGuardian.s.sol` | Deploys a new Guardian for the recorded guard and market |
 | `scripts-js/setupMarket.js` | `npm run setup`: HTS token creation, first `poke()`, `Guardian.start()` |
-| `scripts-js/hcsRelay.js` | `npm run relay`: publishes guard events to an HCS topic |
 | `scripts-js/generateTsAbis.js` | Writes `packages/nextjs/contracts/deployedContracts.ts` from broadcasts |
 
-Each deploy run merges its contracts into `deployments/<chainId>.json`, which `setup` and `relay` read to find addresses.
+Each deploy run merges its contracts into `deployments/<chainId>.json`, which `setup` reads to find addresses.
 
 ## Accounts
 

@@ -19,8 +19,7 @@ In July 2026 Bonzo Lend lost about $9M. Its contracts worked as designed. They t
 | `OracleGuard` + 3 sources | **Chainlink, Supra, Pyth** | One compromised provider cannot move the price; disagreement halts borrowing |
 | `LendingMarket` | **HTS** | Creates and mints gUSDC, so a deposit is a native token that shows in any wallet and on HashScan |
 | `Guardian` | **HSS** (HIP-1215) | Re-runs the oracle check and accrues interest on a schedule it books itself, with no off-chain keeper |
-| `hcsRelay.js` | **HCS** | An ordered, timestamped record of every oracle decision, for post-mortems |
-| Dashboard | Mirror node | Live sources, breaker state, lend/borrow/liquidate, audit log |
+| Dashboard | Mirror node | Live sources, breaker state, lend/borrow/liquidate |
 
 ## Run it
 
@@ -48,10 +47,9 @@ cd packages/foundry
 forge script script/Deploy.s.sol --rpc-url hedera_testnet --account <name> --broadcast --slow --legacy
 node scripts-js/generateTsAbis.js
 npm run setup -- --network hedera_testnet --keystore <name>   # HTS token, first price, starts the Guardian
-npm run relay -- --keystore <name>                             # optional: HCS audit log
 ```
 
-`setup` exists because `forge script` simulates locally, where the HTS and HSS system contracts don't exist. It is safe to re-run. The relayer prints a topic id on its first run; set it as `NEXT_PUBLIC_AUDIT_TOPIC_ID` in `packages/nextjs/.env.local`.
+`setup` exists because `forge script` simulates locally, where the HTS and HSS system contracts don't exist. It is safe to re-run.
 
 **Costs (testnet):**
 - Deploy: about 5 HBAR.
@@ -104,7 +102,6 @@ The shared deployment lends **tUSD**, a test stablecoin with a built-in faucet (
 | Guardian | [`0x294D…6b41`](https://hashscan.io/testnet/contract/0x294Dd6EE7D5fab9BA4960091618392cfD74A6b41) |
 | tUSD faucet | [`0x5007…8074`](https://hashscan.io/testnet/contract/0x5007b82a0E3ea33933822705D609153B10618074) |
 | tUSD / gtUSD | [`0.0.10792808`](https://hashscan.io/testnet/token/0.0.10792808) / [`0.0.10793053`](https://hashscan.io/testnet/token/0.0.10793053) |
-| Audit topic | [`0.0.10772847`](https://hashscan.io/testnet/topic/0.0.10772847) |
 | First oracle check | [`0xefde…f03d`](https://hashscan.io/testnet/tx/0xefdea630a43e50726d8151e9e1e010d922d3cdda13f3567978928e128455f03d) |
 
 Hedera behaviour that differs from other EVM chains, and how this template handles it: [docs/hedera-notes.md](docs/hedera-notes.md). Not audited.
