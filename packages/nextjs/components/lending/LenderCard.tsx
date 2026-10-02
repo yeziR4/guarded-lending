@@ -81,7 +81,7 @@ export const LenderCard = () => {
           </>
         )}
 
-        {faucet?.address && asset.isAssociated !== false ? (
+        {faucet?.address ? (
           <button className="btn btn-sm btn-ghost" onClick={claim}>
             Get 1,000 {market.assetSymbol} (testnet faucet)
           </button>
