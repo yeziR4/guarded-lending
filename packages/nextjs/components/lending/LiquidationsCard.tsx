@@ -41,7 +41,7 @@ export const LiquidationsCard = () => {
   };
 
   return (
-    <section className="card bg-base-100 border border-base-300 shadow-md">
+    <section className="card bg-base-100 shadow-sm">
       <div className="card-body gap-3">
         <h2 className="card-title">Liquidations</h2>
         <p className="text-sm text-base-content/70 m-0">
@@ -88,7 +88,7 @@ const BorrowerRow = ({ borrower, price, symbol, closeFactorBps, onLiquidate }: B
   const liquidatable = healthFactor < WAD;
 
   return (
-    <div className="rounded-box border border-base-300 p-3 flex flex-col gap-2">
+    <div className="rounded-box bg-base-200 p-3 flex flex-col gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <HederaAddress address={borrower} chain={targetNetwork} />
         <span>

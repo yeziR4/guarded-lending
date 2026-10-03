@@ -30,7 +30,7 @@ const STATUS_COLOR = [
 ] as const;
 
 const Item = ({ label, children }: { label: string; children: ReactNode }) => (
-  <span className="flex items-center gap-2 px-5 whitespace-nowrap border-r border-white/10">
+  <span className="flex items-center gap-2 px-6 whitespace-nowrap">
     <span className={LABEL}>{label}</span>
     {children}
   </span>
@@ -81,7 +81,7 @@ export const OracleTicker = () => {
   );
 
   return (
-    <div className={`${BAR} w-full overflow-hidden border-b border-white/10`} aria-label="Oracle guard feed">
+    <div className={`${BAR} w-full overflow-hidden`} aria-label="Oracle guard feed">
       <div className="ticker-track flex w-max py-2">
         {items}
         {items}
@@ -115,8 +115,8 @@ export const MarketBar = () => {
   const scheduled = schedule !== undefined && BigInt(schedule) !== 0n;
 
   return (
-    <div className={`${BAR} fixed bottom-0 left-0 z-20 w-full border-t border-white/10`}>
-      <div className="flex items-center overflow-x-auto py-2">
+    <div className={`${BAR} fixed bottom-0 left-0 z-20 w-full`}>
+      <div className="flex items-center overflow-x-auto py-2 [scrollbar-width:none]">
         <Item label="Supplied">{`${formatAsset(market.totalAssets)} ${market.assetSymbol}`}</Item>
         <Item label="Borrowed">{`${formatAsset(market.totalBorrows)} ${market.assetSymbol}`}</Item>
         <Item label="Util">{formatWadPercent(market.utilization)}</Item>

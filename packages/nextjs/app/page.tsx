@@ -8,29 +8,40 @@ import { MarketBar, OracleTicker } from "~~/components/lending/Ticker";
 
 const STEPS = ["Get tUSD", "Supply it to earn", "Or lock HBAR", "Borrow against it"];
 
+const scrollToMarket = () => document.getElementById("market")?.scrollIntoView({ behavior: "smooth" });
+
 const Home: NextPage = () => {
   return (
     <div className="flex flex-col items-center grow pb-16">
       <OracleTicker />
 
-      <div className="hedera-gradient dark:bg-none dark:bg-hedera-charcoal w-full py-10 px-5">
-        <div className="max-w-3xl mx-auto text-center text-white">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">Guarded Lending</h1>
-          <p className="text-white/85 m-0">
+      <section className="hedera-gradient dark:bg-none dark:bg-hedera-charcoal w-full min-h-[calc(100vh-8rem)] flex items-center px-5">
+        <div className="fade-up max-w-3xl mx-auto text-center text-white">
+          <h1 className="text-4xl md:text-6xl font-bold mb-5">Guarded Lending</h1>
+          <p className="text-lg md:text-xl text-white/85 m-0">
             Borrow against HBAR, priced by Chainlink, Supra and Pyth together. If they disagree, the market stops
             instead of trusting a forged price.
           </p>
-          <ol className="flex flex-wrap justify-center gap-2 mt-5 p-0 list-none text-sm">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-8 text-white/90">
             {STEPS.map((step, i) => (
-              <li key={step} className="badge badge-lg bg-white/15 border-0 text-white">
-                {i + 1}. {step}
-              </li>
+              <button key={step} className="cursor-pointer hover:text-white transition-colors" onClick={scrollToMarket}>
+                <span className="font-semibold text-white">{i + 1}</span> {step}
+              </button>
             ))}
-          </ol>
+          </div>
+          <button
+            className="btn btn-lg mt-10 border-0 bg-white text-hedera-violet hover:bg-white/90"
+            onClick={scrollToMarket}
+          >
+            Get started
+          </button>
         </div>
-      </div>
+      </section>
 
-      <div className="w-full max-w-5xl mx-auto px-5 mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div
+        id="market"
+        className="w-full max-w-5xl mx-auto px-5 pt-12 min-h-screen scroll-mt-20 grid grid-cols-1 md:grid-cols-2 content-start gap-6"
+      >
         <LenderCard />
         <BorrowerCard />
         <div className="md:col-span-2">

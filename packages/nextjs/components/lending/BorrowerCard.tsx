@@ -56,7 +56,7 @@ export const BorrowerCard = () => {
   };
 
   return (
-    <section className="card bg-base-100 border border-base-300 shadow-md">
+    <section className="card bg-base-100 shadow-sm">
       <div className="card-body gap-3">
         <h2 className="card-title">Borrow against HBAR</h2>
         <p className="text-sm text-base-content/70 m-0">
