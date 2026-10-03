@@ -98,6 +98,7 @@ const BorrowerRow = ({ borrower, price, symbol, closeFactorBps, onLiquidate }: B
       </div>
       {liquidatable && (
         <AmountForm
+          label="Repay up to half the debt and receive HBAR at a 5% bonus"
           action="Liquidate"
           unit={symbol}
           decimals={ASSET_DECIMALS}

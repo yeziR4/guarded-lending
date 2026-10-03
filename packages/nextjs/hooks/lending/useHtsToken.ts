@@ -42,6 +42,11 @@ export const useHtsToken = (token: Address | undefined, spender: Address | undef
     await associated.refetch();
   };
 
+  /** Associates the account with the token first if it is not yet associated. */
+  const ensureAssociated = async () => {
+    if (associated.data === false) await associate();
+  };
+
   /** Approves exactly `amount` if the current allowance is lower. */
   const ensureAllowance = async (amount: bigint) => {
     if (!token || !spender || (allowance.data ?? 0n) >= amount) return;
@@ -53,8 +58,7 @@ export const useHtsToken = (token: Address | undefined, spender: Address | undef
 
   return {
     balance: balance.data ?? 0n,
-    isAssociated: associated.data,
-    associate,
+    ensureAssociated,
     ensureAllowance,
     refetch: () => Promise.all([balance.refetch(), allowance.refetch()]),
   };
