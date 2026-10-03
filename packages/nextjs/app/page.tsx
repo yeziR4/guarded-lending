@@ -1,6 +1,7 @@
 "use client";
 
 import type { NextPage } from "next";
+import { AccountNotice } from "~~/components/lending/AccountNotice";
 import { BorrowerCard } from "~~/components/lending/BorrowerCard";
 import { LenderCard } from "~~/components/lending/LenderCard";
 import { LiquidationsCard } from "~~/components/lending/LiquidationsCard";
@@ -42,6 +43,7 @@ const Home: NextPage = () => {
         id="market"
         className="w-full max-w-5xl mx-auto px-5 pt-12 min-h-screen scroll-mt-20 grid grid-cols-1 md:grid-cols-2 content-start gap-6"
       >
+        <AccountNotice />
         <LenderCard />
         <BorrowerCard />
         <div className="md:col-span-2">
