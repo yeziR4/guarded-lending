@@ -31,7 +31,8 @@ const scaffoldConfig = {
 
   pollingInterval: 10000,
 
-  enableBurnerWallet: true,
+  // Off: a funded wallet is needed on testnet, and an auto-connected empty burner wallet only confuses.
+  enableBurnerWallet: false,
 
   rpcOverrides: {
     [chains.hedera.id]: process.env.NEXT_PUBLIC_HEDERA_MAINNET_RPC_URL || "https://mainnet.hashio.io/api",
