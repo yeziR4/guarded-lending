@@ -61,8 +61,9 @@ contract DeployScript is ScaffoldETHDeploy {
         sources[2] = new PythSource(feeds.pyth, feeds.pythHbarUsdId, vm.envOr("PYTH_MAX_CONF_BPS", uint256(200)));
 
         uint256[] memory maxAges = new uint256[](3);
-        maxAges[0] = vm.envOr("CHAINLINK_MAX_AGE", uint256(2 hours));
-        maxAges[1] = vm.envOr("SUPRA_MAX_AGE", uint256(2 hours));
+        // Heartbeat plus margin: Chainlink HBAR/USD on Hedera updates on a 0.5% move or every 24 h.
+        maxAges[0] = vm.envOr("CHAINLINK_MAX_AGE", uint256(25 hours));
+        maxAges[1] = vm.envOr("SUPRA_MAX_AGE", uint256(3 hours));
         // Pyth is pull-based: it is only as fresh as the last update someone pushed.
         maxAges[2] = vm.envOr("PYTH_MAX_AGE", uint256(10 minutes));
 
@@ -97,7 +98,7 @@ contract DeployScript is ScaffoldETHDeploy {
         Guardian guardian = new Guardian(
             guard,
             market,
-            vm.envOr("GUARDIAN_INTERVAL", uint256(6 hours)),
+            vm.envOr("GUARDIAN_INTERVAL", uint256(12 hours)),
             vm.envOr("GUARDIAN_GAS_LIMIT", uint256(2_000_000))
         );
 

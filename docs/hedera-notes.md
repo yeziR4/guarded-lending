@@ -6,6 +6,10 @@ Places where Hedera behaves differently from other EVM chains, and what this tem
 
 Foundry 1.8 sends EIP-1898 block objects for state reads, and the Hedera JSON-RPC relay rejects them with `-32602 Invalid parameter 1: ... [object Object]`. That breaks every `forge script` and every `--fork-url` test; offline `forge test` is unaffected. Use `foundryup --install v1.5.1` (1.7.1 also works). CI pins 1.5.1. See [lattice#227](https://github.com/dadadave80/lattice/issues/227).
 
+## Match staleness to each feed's heartbeat
+
+Chainlink HBAR/USD on Hedera updates on a 0.5% move or every 24 h, so on a calm day its latest round is hours old. Each source's max age is its heartbeat plus a margin: Chainlink 25 h, Supra 3 h (observed hourly), Pyth 10 min, because Pyth is only fresh right after a push. An old reading still has to agree with the others to count.
+
 ## Two units for HBAR
 
 Inside the EVM (`msg.value`, balances, storage) HBAR is **tinybars**, with 8 decimals. Over JSON-RPC it is **weibars**, with 18 decimals. The market stores tinybars, and the frontend multiplies by 10¹⁰ (`WEIBAR_PER_TINYBAR`) when sending value. `cast send --value 30ether` sends 30 HBAR.

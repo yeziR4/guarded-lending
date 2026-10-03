@@ -25,8 +25,8 @@ contract LiveTestnetOraclesTest is Test {
         sources[1] = new SupraSource(SUPRA_PUSH_ORACLE, 75);
         sources[2] = new PythSource(PYTH, PYTH_HBAR_USD, 200);
         uint256[] memory ages = new uint256[](3);
-        ages[0] = 2 hours;
-        ages[1] = 2 hours;
+        ages[0] = 25 hours;
+        ages[1] = 3 hours;
         ages[2] = 10 minutes;
 
         guard = new OracleGuard(

@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-hbar/contract";
 const deployedContracts = {
   296: {
     ChainlinkSource: {
-      address: "0x6e37a5a232f358549544f4e63e8e37bbeb5053b6",
+      address: "0x8a7bf7be83bac2c2eeb270d8e2032872837b8982",
       abi: [
         {
           type: "constructor",
@@ -87,10 +87,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41179939,
+      deployedOnBlock: 41294990,
     },
     SupraSource: {
-      address: "0x688840b5c20f2bb9f7c104bfe6bdefb46846b1e5",
+      address: "0xe913a7d6f98a65378c16bdc078e2435085c1613a",
       abi: [
         {
           type: "constructor",
@@ -188,10 +188,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41179941,
+      deployedOnBlock: 41294992,
     },
     PythSource: {
-      address: "0xafee4da9b552155d6aed7ef61416b6dac4f45ca1",
+      address: "0xd9ee6ccf421dc6bcb3231ce1a9bb81c9ba83a0e2",
       abi: [
         {
           type: "constructor",
@@ -318,10 +318,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41179943,
+      deployedOnBlock: 41294995,
     },
     OracleGuard: {
-      address: "0x53c5421e3c82a83ba35f1962acc79b003f2dff63",
+      address: "0x56d851518ac4eef57e97ba5686ce5519fe5a78e0",
       abi: [
         {
           type: "constructor",
@@ -774,10 +774,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41179946,
+      deployedOnBlock: 41294997,
     },
     LendingMarket: {
-      address: "0x6e22bcdcd4ef19f451564e905d10ef9ed0391cc5",
+      address: "0x861f5528f44210a121937657fddde90e725161a3",
       abi: [
         {
           type: "constructor",
@@ -1605,10 +1605,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41179948,
+      deployedOnBlock: 41294999,
     },
     Guardian: {
-      address: "0x294dd6ee7d5fab9ba4960091618392cfd74a6b41",
+      address: "0x7911ce302a11ab2babfeed757c724c14aa6e516e",
       abi: [
         {
           type: "constructor",
@@ -1853,7 +1853,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 41179950,
+      deployedOnBlock: 41295001,
     },
     TestStablecoin: {
       address: "0x5007b82a0e3ea33933822705d609153b10618074",

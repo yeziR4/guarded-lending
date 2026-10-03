@@ -54,7 +54,7 @@ npm run setup -- --network hedera_testnet --keystore <name>   # HTS token, first
 **Costs (testnet):**
 - Deploy: about 5 HBAR.
 - Token creation: send 30 HBAR; the unused part is refunded.
-- Guardian: about 1.7 HBAR per tick, every 6 h by default.
+- Guardian: about 1.7 HBAR per tick, every 12 h by default.
 
 The Guardian has no owner, so its funding can't be withdrawn. Fund it for as long as you want it to run.
 
@@ -69,8 +69,8 @@ The Guardian has no owner, so its funding can't be withdrawn. Fund it for as lon
 | `GUARD_MAX_CHANGE_BPS` | 2000 | Max move per check before the breaker trips |
 | `GUARD_COOLDOWN` | 1800 | Healthy seconds before a tripped breaker resets |
 | `GUARD_MAX_PRICE_AGE` | 7200 | Oldest price the market will use |
-| `CHAINLINK_MAX_AGE` / `SUPRA_MAX_AGE` / `PYTH_MAX_AGE` | 2h / 2h / 10m | Per-source staleness |
-| `GUARDIAN_INTERVAL` / `GUARDIAN_GAS_LIMIT` | 6h / 2M | Booking a tick costs ~1.4M gas, so keep the limit ≥ 1.6M |
+| `CHAINLINK_MAX_AGE` / `SUPRA_MAX_AGE` / `PYTH_MAX_AGE` | 25h / 3h / 10m | Per-source staleness: the feed's heartbeat plus a margin |
+| `GUARDIAN_INTERVAL` / `GUARDIAN_GAS_LIMIT` | 12h / 2M | Booking a tick costs ~1.4M gas, so keep the limit ≥ 1.6M |
 
 Risk parameters (65% LTV, 80% liquidation threshold, 5% bonus) are in the same script.
 
@@ -97,12 +97,12 @@ The shared deployment lends **tUSD**, a test stablecoin with a built-in faucet (
 
 | | |
 | --- | --- |
-| OracleGuard | [`0x53C5…FF63`](https://hashscan.io/testnet/contract/0x53C5421e3C82a83Ba35f1962acc79b003f2dFF63) |
-| LendingMarket | [`0x6E22…1CC5`](https://hashscan.io/testnet/contract/0x6E22BcdCD4EF19F451564E905D10Ef9eD0391CC5) |
-| Guardian | [`0x294D…6b41`](https://hashscan.io/testnet/contract/0x294Dd6EE7D5fab9BA4960091618392cfD74A6b41) |
+| OracleGuard | [`0x56D8…78e0`](https://hashscan.io/testnet/contract/0x56D851518AC4eef57e97Ba5686cE5519fE5a78e0) |
+| LendingMarket | [`0x861f…61a3`](https://hashscan.io/testnet/contract/0x861f5528f44210a121937657Fddde90e725161a3) |
+| Guardian | [`0x7911…516E`](https://hashscan.io/testnet/contract/0x7911cE302a11ab2babFeED757C724C14Aa6E516E) |
 | tUSD faucet | [`0x5007…8074`](https://hashscan.io/testnet/contract/0x5007b82a0E3ea33933822705D609153B10618074) |
-| tUSD / gtUSD | [`0.0.10792808`](https://hashscan.io/testnet/token/0.0.10792808) / [`0.0.10793053`](https://hashscan.io/testnet/token/0.0.10793053) |
-| First oracle check | [`0xefde…f03d`](https://hashscan.io/testnet/tx/0xefdea630a43e50726d8151e9e1e010d922d3cdda13f3567978928e128455f03d) |
+| tUSD / gtUSD | [`0.0.10792808`](https://hashscan.io/testnet/token/0.0.10792808) / [`0.0.10838545`](https://hashscan.io/testnet/token/0.0.10838545) |
+| First oracle check | [`0x26ef…2337`](https://hashscan.io/testnet/tx/0x26efc4326cbb505e2b7b1349e4e09b6539490006825b9c518877bd7799142337) |
 
 Hedera behaviour that differs from other EVM chains, and how this template handles it: [docs/hedera-notes.md](docs/hedera-notes.md). Not audited.
 
