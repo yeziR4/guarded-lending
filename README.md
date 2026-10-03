@@ -6,6 +6,8 @@ A Scaffold-HBAR template for a lending market that prices through several indepe
 npm create scaffold-hbar@latest -- --template yeziR4/guarded-lending
 ```
 
+**Live demo:** https://guarded-lending-nextjs.vercel.app (Hedera testnet)
+
 Lenders supply USDC and receive gUSDC. Borrowers lock HBAR and borrow USDC. Every price-dependent action goes through `OracleGuard`: the median of Chainlink, Supra and Pyth, accepted only when a quorum agrees.
 
 ## Why
