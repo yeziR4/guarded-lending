@@ -24,18 +24,19 @@ export const usePythUpdate = () => {
     return { status: response.status, body: (await response.json()) as UpdateResponse };
   };
 
-  // 501 means no PYTH_API_KEY on the server.
+  // False without a key (501) or when Hermes refuses it (502), e.g. a key without feed entitlements.
   const { data: configured = false } = useQuery({
     queryKey: ["pyth-configured", priceId],
     enabled: Boolean(priceId),
     staleTime: Infinity,
-    queryFn: async () => (await fetchUpdate()).status !== 501,
+    queryFn: async () => (await fetchUpdate()).status === 200,
   });
 
+  // Best effort: if no update is available, the guard prices on the other sources.
   const refresh = async () => {
     if (!configured || !pyth || !publicClient) return;
     const { body } = await fetchUpdate();
-    if (!body.updateData) throw new Error(body.error ?? "Pyth update unavailable");
+    if (!body.updateData) return;
 
     const fee = await publicClient.readContract({
       address: pyth.address,

@@ -30,7 +30,9 @@ export const BorrowerCard = () => {
   const refresh = () => Promise.all([asset.refetch(), market.refetch()]);
   // Wallet balances come back in weibars; the market works in tinybars.
   const walletTinybars = hbar ? hbar.value / WEIBAR_PER_TINYBAR : 0n;
+  const liquidity = market.totalAssets > market.totalBorrows ? market.totalAssets - market.totalBorrows : 0n;
   const headroom = maxDebt > debt ? maxDebt - debt : 0n;
+  const borrowable = headroom < liquidity ? headroom : liquidity;
   const healthClass = healthFactor < WAD ? "text-error" : healthFactor < (12n * WAD) / 10n ? "text-warning" : "";
 
   const deposit = async (tinybars: bigint) => {
@@ -90,13 +92,18 @@ export const BorrowerCard = () => {
             onSubmit={deposit}
           />
         )}
-        {collateral > 0n && (
+        {collateral > 0n && liquidity === 0n && (
+          <p className="text-sm m-0">
+            Nothing to borrow yet: no {symbol} has been supplied. Supply some in the Lend card first.
+          </p>
+        )}
+        {collateral > 0n && liquidity > 0n && (
           <AmountForm
             label={`Borrow ${symbol}`}
             action="Borrow"
             unit={symbol}
             decimals={ASSET_DECIMALS}
-            max={headroom}
+            max={borrowable}
             onSubmit={borrow}
           />
         )}
