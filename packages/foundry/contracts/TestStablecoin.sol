@@ -24,6 +24,7 @@ contract TestStablecoin {
     error NotInitialized();
     error ClaimTooSoon(uint256 availableAt);
     error HtsCallFailed(int64 responseCode);
+    error RefundFailed();
 
     event Claimed(address indexed to, uint256 amount);
 
@@ -52,7 +53,10 @@ contract TestStablecoin {
         token = created;
 
         uint256 spare = address(this).balance - RENEWAL_RESERVE;
-        if (spare > 0) payable(msg.sender).transfer(spare);
+        if (spare > 0) {
+            (bool ok,) = msg.sender.call{ value: spare }("");
+            if (!ok) revert RefundFailed();
+        }
     }
 
     /// @notice Mints `CLAIM_AMOUNT` to the caller, once per `CLAIM_COOLDOWN`. The caller must be associated.

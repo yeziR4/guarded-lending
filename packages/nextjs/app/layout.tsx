@@ -7,7 +7,7 @@ import { getMetadata } from "~~/utils/scaffold-hbar/getMetadata";
 
 export const metadata = getMetadata({
   title: "Guarded Lending",
-  description: "Oracle-guarded USDC lending on Hedera, built with Scaffold-HBAR",
+  description: "Oracle-guarded stablecoin lending on Hedera, built with Scaffold-HBAR",
 });
 
 const ScaffoldHbarApp = ({ children }: { children: React.ReactNode }) => {

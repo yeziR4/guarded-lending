@@ -3,23 +3,23 @@
 A Scaffold-HBAR template for a lending market that prices through several independent oracles and **stops instead of trusting a forged price**.
 
 ```bash
-npm create scaffold-hbar@latest -- --template yeziR4/guarded-lending
+npx create-scaffold-hbar@latest --template yeziR4/guarded-lending
 ```
 
 **Live demo:** https://guarded-lending-nextjs.vercel.app (Hedera testnet)
 
-Lenders supply USDC and receive gUSDC. Borrowers lock HBAR and borrow USDC. Every price-dependent action goes through `OracleGuard`: the median of Chainlink, Supra and Pyth, accepted only when a quorum agrees.
+Lenders supply a stablecoin and receive an HTS share token. Borrowers lock HBAR and borrow the stablecoin. Every price-dependent action goes through `OracleGuard`: the median of Chainlink, Supra and Pyth, accepted only when a quorum agrees.
 
 ## Why
 
-In July 2026 Bonzo Lend lost about $9M. Its contracts worked as designed. They trusted one oracle, and that oracle's verifier accepted a forged price about 10¹² too high ([incident report](https://bonzo.finance/blog/bonzo-lend-incident-report-oracle-provider-exploit)). `test/BonzoReplay.t.sol` replays the attack against this market twice. Wired to a single feed, the pool is drained. Through the guard, the attack reverts. How the guard decides: [docs/oracle-guard.md](docs/oracle-guard.md).
+In July 2026 Bonzo Lend lost about $9M. Its contracts worked as designed. They trusted one oracle, and that oracle's verifier accepted a forged price about 10¹² too high ([incident report](https://bonzo.finance/blog/bonzo-lend-incident-report-oracle-provider-exploit)). `packages/foundry/test/BonzoReplay.t.sol` replays the attack against this market twice. Wired to a single feed, the pool is drained. Through the guard, the attack reverts. How the guard decides: [docs/oracle-guard.md](docs/oracle-guard.md).
 
 ## What each piece uses, and why
 
 | Piece | Uses | Why it needs it |
 | --- | --- | --- |
 | `OracleGuard` + 3 sources | **Chainlink, Supra, Pyth** | One compromised provider cannot move the price; disagreement halts borrowing |
-| `LendingMarket` | **HTS** | Creates and mints gUSDC, so a deposit is a native token that shows in any wallet and on HashScan |
+| `LendingMarket` | **HTS** | Creates and mints the share token (gtUSD on the shared deployment), so a deposit is a native token that shows in any wallet and on HashScan |
 | `Guardian` | **HSS** (HIP-1215) | Re-runs the oracle check and accrues interest on a schedule it books itself, with no off-chain keeper |
 | Dashboard | Mirror node | Live sources, breaker state, lend/borrow/liquidate |
 
@@ -32,12 +32,12 @@ cd <your-app>
 npm run next:dev
 ```
 
-Open http://localhost:3000. Chainlink and Supra show **Ok**, Pyth shows **Stale** (see [Pyth](#pyth)), and the guard shows "2 of 3 agree". To use the market, connect a testnet wallet and get HBAR from the [portal faucet](https://portal.hedera.com/faucet), then press **Get 1,000 tUSD** in the Lend card. The UI asks you to **associate** each token first, which Hedera requires before an account can hold it.
+Open http://localhost:3000. The ticker shows Chainlink and Supra **Ok**, Pyth waiting for an API key (see [Pyth](#pyth)), and "2 of 3 agree". To use the market, connect a testnet wallet, get HBAR from the [portal faucet](https://portal.hedera.com/faucet), and press **Start: get 1,000 tUSD** in the Lend card. Hedera requires an account to **associate** with a token before holding it; the dashboard sends that transaction for you the first time.
 
 **Prerequisites:**
 - Node ≥ 20.18.3
 - git with `user.name` and `user.email` set
-- `make`
+- On Windows: `git config --global core.longpaths true` (Foundry libraries have deep paths)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation) **below 1.8** (`foundryup --install v1.5.1`). Foundry 1.8 breaks deploys against Hedera's RPC; see [why](docs/hedera-notes.md#pin-foundry-below-18).
 
 ## Deploy your own
@@ -62,7 +62,7 @@ The Guardian has no owner, so its funding can't be withdrawn. Fund it for as lon
 
 ## Configuration
 
-`script/Deploy.s.sol`, overridable by environment variable:
+`packages/foundry/script/Deploy.s.sol`, overridable by environment variable:
 
 | Variable | Default | |
 | --- | --- | --- |
@@ -78,24 +78,24 @@ Risk parameters (65% LTV, 80% liquidation threshold, 5% bonus) are in the same s
 
 ### Pyth
 
-Pyth only updates on-chain when someone pushes a signed update, and since August 2026 its API needs a key. Without `PYTH_API_KEY` (server-side, in `packages/nextjs/.env.local`), Pyth stays stale and the guard runs on Chainlink and Supra. With it, "Refresh Pyth" brings the third source in.
+Pyth only updates on-chain when someone pushes a signed update, and since August 2026 its API needs a key. Without `PYTH_API_KEY` (server-side, in `packages/nextjs/.env.local`), Pyth stays stale and the guard runs on Chainlink and Supra. With it, the dashboard pushes a fresh Pyth price before each borrow or collateral withdrawal, bringing the third source in. Copy `packages/nextjs/.env.example` to `.env.local` to set it.
 
 ## Test
 
 ```bash
-npm run foundry:test            # 49 offline tests, including the Bonzo replay; HTS and HSS are mocked
+npm run foundry:test            # 49 offline tests, including the Bonzo replay; HTS and HSS are mocked (the live test is skipped)
 npm run foundry:test:testnet    # the real guard against live testnet feeds
-bash scripts/check-gate.sh --local   # fresh scaffold, lint, test, build, boot
+bash scripts/check-gate.sh --local   # in a clone of this repo: fresh scaffold, lint, test, build, boot
 ```
 
 ## Extend
 
-- **Add a source:** implement `IPriceSource`, wire it in `Deploy.s.sol` with its max age, and add a slot in `hooks/lending/useOracleGuard.ts`.
+- **Add a source:** implement `IPriceSource`, wire it in `Deploy.s.sol` with its max age, and add a slot in `packages/nextjs/hooks/lending/useOracleGuard.ts`.
 - **Reuse the guard alone:** it has no dependency on the market. Call `poke()` then `price()`.
 
 ## Testnet deployment
 
-The shared deployment lends **tUSD**, a test stablecoin with a built-in faucet (`TestStablecoin.sol`), so anyone can try the full flow. Deploy your own against Circle USDC by leaving `LENDING_ASSET` unset.
+The shared deployment lends **tUSD**, a test stablecoin with a built-in faucet (`packages/foundry/contracts/TestStablecoin.sol`), so anyone can try the full flow. Deploy your own against Circle USDC by leaving `LENDING_ASSET` unset.
 
 | | |
 | --- | --- |

@@ -6,7 +6,7 @@
 #   scripts/check-gate.sh owner/repo[#ref]   scaffold from GitHub, exactly as judges do
 #   scripts/check-gate.sh --local            scaffold from this checkout's committed files (before pushing)
 #
-# Needs: node >= 20.18.3, npm, git, make, Foundry (forge), curl.
+# Needs: node >= 20.18.3, npm, git, Foundry (forge), curl.
 set -euo pipefail
 
 TARGET="${1:?usage: scripts/check-gate.sh owner/repo[#ref] | --local}"
@@ -21,9 +21,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-step() { printf '\n\033[1m▶ %s\033[0m\n' "$1"; }
-fail() { printf '\033[31m✗ %s\033[0m\n' "$1"; exit 1; }
-pass() { printf '\033[32m✓ %s\033[0m\n' "$1"; }
+step() { printf '\n\033[1mâ–¶ %s\033[0m\n' "$1"; }
+fail() { printf '\033[31mâœ— %s\033[0m\n' "$1"; exit 1; }
+pass() { printf '\033[32mâœ“ %s\033[0m\n' "$1"; }
 
 step "Template manifest and required files"
 node -e '

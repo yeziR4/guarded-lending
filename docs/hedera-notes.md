@@ -16,7 +16,7 @@ Inside the EVM (`msg.value`, balances, storage) HBAR is **tinybars**, with 8 dec
 
 ## Token association
 
-An account must associate with an HTS token before it can receive it. HTS tokens expose IHRC-719 `associate()` on their EVM address, so a normal wallet can do it in one call. The dashboard shows an "Associate" button when `isAssociated()` returns false. That call reads the caller's own status, so it is sent `from` the connected account.
+An account must associate with an HTS token before it can receive it. HTS tokens expose IHRC-719 `associate()` on their EVM address, so a normal wallet can do it in one call. Before the first action that sends the connected account a token, the dashboard checks `isAssociated()` and sends `associate()` if needed. That call reads the caller's own status, so it is sent `from` the connected account.
 
 ## A contract can only sign for itself in an HTS call
 

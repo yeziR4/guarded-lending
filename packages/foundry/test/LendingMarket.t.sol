@@ -19,7 +19,7 @@ contract LendingMarketTest is MarketFixture {
                                 LENDERS
     //////////////////////////////////////////////////////////////*/
 
-    function test_supply_mintsHtsSharesOneToOneOnEmptyMarket() public {
+    function test_supply_mintsHtsSharesOneToOneOnEmptyMarket() public view {
         assertEq(shares.balanceOf(lender), 50_000 * ONE_USDC);
         assertEq(shares.totalSupply(), 50_000 * ONE_USDC);
         assertEq(usdc.balanceOf(address(market)), 50_000 * ONE_USDC);

@@ -9,10 +9,7 @@ export type ScaffoldConfig = {
 };
 
 // The shared deployment is on testnet only; listing other chains makes wallets ask for extra permissions.
-const targetNetworks = [chains.hederaTestnet] as const satisfies readonly [
-  chains.Chain,
-  ...chains.Chain[],
-];
+const targetNetworks = [chains.hederaTestnet] as const satisfies readonly [chains.Chain, ...chains.Chain[]];
 
 const scaffoldConfig = {
   targetNetworks,

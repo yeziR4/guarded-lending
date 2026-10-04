@@ -2,12 +2,12 @@
 
 Guide for coding agents working in a project made from the **guarded-lending** template (Claude Code loads it through `CLAUDE.md`). Read `README.md` first, and `docs/oracle-guard.md` before changing pricing.
 
-## Commands (npm only)
+## Commands (use npm)
 
 ```bash
 npm run foundry:test          # offline; must stay green
 npm run foundry:test:testnet  # live testnet feeds
-npm run lint                  # next lint + forge fmt --check + prettier (needs make)
+npm run lint                  # next lint + forge fmt --check + prettier
 npm run next:check-types
 npm run next:build
 npm run next:dev
