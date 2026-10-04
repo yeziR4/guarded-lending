@@ -1,5 +1,9 @@
 # Guarded Lending
 
+https://github.com/user-attachments/assets/7efbb352-2f1b-490a-ad5b-1b4bf27cd7cd
+
+
+
 A Scaffold-HBAR template for a lending market that prices through several independent oracles and **stops instead of trusting a forged price**.
 
 ```bash
