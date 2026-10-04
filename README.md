@@ -1,9 +1,5 @@
 # Guarded Lending
 
-https://github.com/user-attachments/assets/7efbb352-2f1b-490a-ad5b-1b4bf27cd7cd
-
-
-
 A Scaffold-HBAR template for a lending market that prices through several independent oracles and **stops instead of trusting a forged price**.
 
 ```bash
@@ -11,6 +7,8 @@ npx create-scaffold-hbar@latest --template yeziR4/guarded-lending
 ```
 
 **Live demo:** https://guarded-lending-nextjs.vercel.app (Hedera testnet)
+
+https://github.com/user-attachments/assets/7efbb352-2f1b-490a-ad5b-1b4bf27cd7cd
 
 Lenders supply a stablecoin and receive an HTS share token. Borrowers lock HBAR and borrow the stablecoin. Every price-dependent action goes through `OracleGuard`: the median of Chainlink, Supra and Pyth, accepted only when a quorum agrees.
 
@@ -109,6 +107,7 @@ The shared deployment lends **tUSD**, a test stablecoin with a built-in faucet (
 | tUSD faucet | [`0x5007…8074`](https://hashscan.io/testnet/contract/0x5007b82a0E3ea33933822705D609153B10618074) |
 | tUSD / gtUSD | [`0.0.10792808`](https://hashscan.io/testnet/token/0.0.10792808) / [`0.0.10838545`](https://hashscan.io/testnet/token/0.0.10838545) |
 | First oracle check | [`0x26ef…2337`](https://hashscan.io/testnet/tx/0x26efc4326cbb505e2b7b1349e4e09b6539490006825b9c518877bd7799142337) |
+| A guarded borrow | [`0x12e0…1e6b`](https://hashscan.io/testnet/tx/0x12e017637d3bdda1965d20a935d7d5c484bec31136bb7cb363102f0bd61d1e6b) |
 
 Hedera behaviour that differs from other EVM chains, and how this template handles it: [docs/hedera-notes.md](docs/hedera-notes.md). Not audited.
 
